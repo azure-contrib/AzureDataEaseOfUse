@@ -18,16 +18,13 @@ namespace AzureDataEaseOfUse
         // Note: This is lazy loaded
         static Storage()  { SetupBestPractices(); }
 
-
         public const string DefaultStorageConnectionStringName = "DefaultStorageConnectionString";
         
-        /// <summary>
-        /// Creates account object.  Connection strings, NOT app settings, are used for security purposes.
-        /// </summary>
-        /// <param name="connectionStringName">Name of connection string, not connection string itself.</param>
         public static CloudStorageAccount Connect(string connectionStringName = DefaultStorageConnectionStringName)
         {
             var connection_string = CloudConfigurationManager.GetSetting(connectionStringName);
+            
+            // TODO: switch to connection string instead of AppSetting
             //var connection_string = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
 
             var account = CloudStorageAccount.Parse(connection_string);
@@ -57,8 +54,6 @@ namespace AzureDataEaseOfUse
         /// </summary>
         public static CloudStorageAccount NagleAlgorithm(this CloudStorageAccount account, bool enabled)
         {
-            // Disable Nagle Algorithm: http://robertgreiner.com/2012/06/why-is-azure-table-storage-so-slow/
-
             account.TableServicePoint().UseNagleAlgorithm = enabled;
 
             return account;
@@ -69,8 +64,6 @@ namespace AzureDataEaseOfUse
         /// </summary>
         public static void NagleAlgorithm(bool enabled)
         {
-            // Disable Nagle Algorithm: http://robertgreiner.com/2012/06/why-is-azure-table-storage-so-slow/
-
             ServicePointManager.UseNagleAlgorithm = enabled;
         }
 
@@ -103,7 +96,7 @@ namespace AzureDataEaseOfUse
 
         #endregion
 
-        #region Infrastructure (ServicePoint)
+        #region Infrastructure (ServicePoint, Table Keys)
 
         public static ServicePoint TableServicePoint(this CloudStorageAccount account)
         {

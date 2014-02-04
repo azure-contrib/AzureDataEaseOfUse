@@ -121,7 +121,7 @@ namespace AzureDataEaseOfUse.Tables
             return new TableBatch<T>(table);
         }
 
-        #region Table & Tables
+        #region Table(s)
 
         public static IEnumerable<CloudTable> Tables(this CloudStorageAccount account, string prefix = null)
         {
