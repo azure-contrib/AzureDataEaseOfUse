@@ -5,14 +5,13 @@ Intention: Less code developing with Azure storage and caching
 
 Subtext: Intended to be somewhat opinionated, but allow overrides for most alterations
 
-Currently only Tables are developed against, and still have a bit of work to go.  After more work, a NuGet package will probably be created.  Most all methods are synchonous except batch.  It should change in the future to be async first as it is the appropriate style for api calls.  However, it is more common for devs to use sync methods as it is more easily understood.  Sync/Async will be split up by namespace to remove the "Async" postpended naming clutter.
+Currently only Tables are developed against, and still have a bit of work to go. After more work, a NuGet package will probably be created. Most all methods are synchronous except batch. It should change in the future to be async first as it is the appropriate style for api calls. However, it is more common for devs to use sync methods as it is more easily understood. Sync/Async will be split up by namespace to remove the "Async" postpended naming clutter.
 
-Most all functionality is "extended", not created (batches are the exception).  This way you don't loose much of the baremetal control.  Just gain simplicity.
+Most all functionality is "extended", not created (batches are the exception). This way you don't lose much of the bare metal control. Just gain simplicity.
 
-Crud ops are tested against live Azure.  Batch and search ops still need vetting.
+Crud ops are tested against live Azure. Batch and search ops still need vetting.
 
-
-MIT Licensed.  As with any code, use in your own good judgement and have fun :-)
+MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
 
 
