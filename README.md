@@ -15,8 +15,10 @@ MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
 
 
-Examples
+Getting Started
 ==========
+
+*** Temp: Currently have to copy classes into your project.  NuGet package to follow eventually.
 
 Add namespaces
 ```csharp    
@@ -24,16 +26,26 @@ Add namespaces
     using AzureDataEaseOfUse.Tables;
 ```
 
+Add AppSetting
+```csharp
+    <add key ="DefaultStorageConnectionString" value ="[your connection]"/>
+```
+
 Pretend connect to Azure Storage
 ```csharp 
     // Kick off will change in the future, but nothing major
     var azure = Storage.Connect();
+    
+    // or override connection string name
+    var azure = Storage.Connect("my_specific_name");
 ```
 
 Your objects
 ```csharp 
     class Mine : TableEntity, IAzureStorageTable
     {
+        // your stuff
+    
         public string GetPartitionKey() {}
         public string GetRowKey() {}
     }
@@ -75,6 +87,9 @@ List and Search
 
 Batches
 -------
+
+Most batch commands return the batch object to allow declarative continuation.
+
 ```csharp 
     var batch = table.Batch<ExamplePost>();
     
@@ -109,7 +124,6 @@ Tables
 
     azure.Tables("prefix");
     
-    
     // Get Partition and Row keys in 1 shot
     table.GetTableKeys();
     
@@ -137,7 +151,7 @@ Per Connection
     
     azure.Expect100Continue(enabled: Your_Answer);
     
-    // Shortcut do whatever you want to the endpoint
+    // Shortcut to do whatever you want to the endpoint
     azure.TableServicePoint();
 ```
 
