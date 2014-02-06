@@ -9,7 +9,7 @@ Currently only Tables are developed against, and still have a bit of work to go.
 
 Most all functionality is "extended", not created (batches are the exception). This way you don't lose much of the bare metal control. Just gain simplicity.
 
-Crud ops are tested against live Azure. Batch and search ops still need vetting.
+Crud ops, batch, and search are tested against live Azure.  Batch and search still need vetting.
 
 MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
@@ -73,6 +73,10 @@ or save more time
     table.Update(stuff);
      
     table.Delete(stuff);
+```
+or 1 line add (or update/delete/etc)
+```csharp
+    Storage.Connect().Table("Posts").Add(entry);
 ```
 
 List and Search
