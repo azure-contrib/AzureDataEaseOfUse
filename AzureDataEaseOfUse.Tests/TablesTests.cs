@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,9 +16,6 @@ namespace AzureDataEaseOfUse.Tests
     [TestClass]
     public class TableTests
     {
-
-        // Items that execute multiple options have to have a delay, otherwise Azure storage gives 400's
-
 
         #region Additional test attributes
         //
@@ -43,105 +41,196 @@ namespace AzureDataEaseOfUse.Tests
 
         #region Reset Tests
 
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext) 
-        {
-            System.Threading.Thread.Sleep(3000);
-        }
-
         [ClassCleanup()]
         public static void Cleanup() 
         {
-
-            System.Threading.Thread.Sleep(5000);
-
             var azure = Storage.Connect();
 
-            foreach (var table in Storage.Connect().Tables())
+            foreach (var table in azure.Tables())
                 table.Delete(true);
+        }
 
-            System.Threading.Thread.Sleep(5000);
+        #endregion
+
+        #region Add, Update, Delete
+
+        [TestMethod]
+        public void Can_Add_Item()
+        {
+            var table = Simulate.Table();
+
+            var result = table.Add(Simulate.Post());
+
+            Assert.AreEqual(204, result.HttpStatusCode);
+        }
+
+
+        [TestMethod]
+        public void Can_Update_Item()
+        {
+            var table = Simulate.Table();
+            var original = Simulate.Post();
+
+            table.Add(original);
+
+            var updated = table.Get<ExamplePost>(original);
+
+            updated.Posted = original.Posted.AddDays(3);
+
+            var result = table.Update(updated);
+
+            Assert.AreEqual(204, result.HttpStatusCode);
+        }
+
+
+        [TestMethod]
+        public void Can_Delete_Item()
+        {
+            var table = Simulate.Table();
+            var post = Simulate.Post();
+
+            table.Add(post);
+
+            var result = table.Delete(post);
+
+            Assert.AreEqual(204, result.HttpStatusCode);
+        }
+
+        #endregion
+
+        #region Get & List
+
+        [TestMethod]
+        public void Can_Get_Item()
+        {
+            var table = Simulate.Table();
+            var post = Simulate.Post();
+
+            table.Add(post);
+
+            var result = table.Get<ExamplePost>(post.PartitionKey, post.RowKey);
+
+            Assert.AreEqual(post.Posted, result.Posted);
+        }
+
+        [TestMethod]
+        public void Can_List_Items()
+        {
+            var table = Simulate.FilledTable();
+
+            var results = table.List<ExamplePost>("a");
+
+            Assert.AreEqual(3, results.Count);
+        }
+
+        #endregion
+
+        #region Search
+
+        [TestMethod]
+        public void Can_Search_Items_By_Row_Key_Equals()
+        {
+            var table = Simulate.FilledTable();
+
+            var results = table.Where<ExamplePost>(q => q.RowKey == "2");
+
+            Assert.AreEqual(3, results.Count);
+        }
+
+
+        [TestMethod]
+        public void Can_Search_Items_By_Column_Equal()
+        {
+            var table = Simulate.FilledTable();
+
+            var results = table.Where<ExamplePost>(q => q.Amount == 3);
+
+            Assert.AreEqual(9, results.Count);
+        }
+
+        [TestMethod]
+        public void Can_Search_Items_By_Column_Range()
+        {
+            var table = Simulate.FilledTable();
+
+            var results = table.Where<ExamplePost>(q => q.Amount < 4);
+
+            Assert.AreEqual(9, results.Count);
+        }
+
+
+        [TestMethod]
+        public void Can_Search_Items_By_Row_And_Column()
+        {
+            var table = Simulate.FilledTable();
+
+            var results = table.Where<ExamplePost>(q => q.RowKey == "2" && q.Amount < 4);
+
+            Assert.AreEqual(3, results.Count);
+        }
+
+        #endregion
+
+        #region Batch
+
+        [TestMethod]
+        public void Can_Batch_Add_Items()
+        {
+            var table = Simulate.Table();
+            var batch = table.Batch<ExamplePost>();
+
+            for (int x = 1; x <= 5; x++)
+                batch.Add(Simulate.Post("a", x.ToString()));
+
+            var results = batch.Execute();
+
+            foreach(var result in results)
+                Assert.AreEqual(201, result.HttpStatusCode);
+        }
+
+        [TestMethod]
+        public void Can_Batch_Add_Over_100_Items_Same_Partion_Key()
+        {
+            var table = Simulate.Table();
+            var batch = table.Batch<ExamplePost>();
+
+            for (int x = 1; x <= 110; x++)
+                batch.Add(Simulate.Post("a", x.ToString()));
+
+            var results = batch.Execute();
+
+            foreach (var result in results)
+                Assert.AreEqual(201, result.HttpStatusCode);
+        }
+
+        [TestMethod]
+        public void Can_Batch_Different_Partitions()
+        {
+            var table = Simulate.Table();
+            var batch = table.Batch<ExamplePost>();
+
+            batch.Add(Simulate.Post("a"));
+            batch.Add(Simulate.Post("b"));
+
+            var results = batch.Execute();
+
+            foreach (var result in results)
+                Assert.AreEqual(201, result.HttpStatusCode);
         }
 
         #endregion
 
 
         [TestMethod]
-        public void Can_Add_Item()
+        public void SyncKeysOnRow_Works()
         {
-            var tableName = Simulate.TableName();
-
             var post = Simulate.Post();
 
-            var result = Storage.Connect().Table(tableName).Add(post);
+            post.SyncKeysOnRow();
 
-            Assert.AreEqual(204, result.HttpStatusCode);
+            Assert.AreEqual(post.BlogId, post.PartitionKey);
+            Assert.AreEqual(post.Title, post.RowKey);
         }
-
-
-        [TestMethod]
-        public void Can_Get_Item()
-        {
-            var tableName = Simulate.TableName();
-
-            var post = Simulate.Post();
-
-            Storage.Connect().Table(tableName).Add(post);
-
-            var result = Storage.Connect().Table(tableName).Get<ExamplePost>(post.PartitionKey, post.RowKey);
-
-            Assert.AreEqual(post.Posted, result.Posted);
-        }
-
-        [TestMethod]
-        public void Can_Delete_Item()
-        {
-            var tableName = Simulate.TableName();
-
-            var post = Simulate.Post();
-
-            Storage.Connect().Table(tableName).Add(post);
-
-            var result = Storage.Connect().Table(tableName).Delete(post);
-
-            Assert.AreEqual(204, result.HttpStatusCode);
-        }
-
-        [TestMethod]
-        public void Can_List_Items()
-        {
-            var tableName = Simulate.TableName();
-
-            var table = Storage.Connect().Table(tableName);
-
-            table.Add(Simulate.Post("blog1", "abc"));
-            table.Add(Simulate.Post("blog1", "123"));
-            table.Add(Simulate.Post("blog2", "xyz"));
-
-            var results = table.List<ExamplePost>("blog1");
-
-            Assert.AreEqual(2, results.Count);
-        }
-
-        [TestMethod]
-        public void Can_Batch_Add_Items()
-        {
-            var tableName = Simulate.TableName();
-
-            var table = Storage.Connect().Table(tableName);
-
-            var additions = new List<ExamplePost>();
-
-            additions.Add(Simulate.Post("blog1", "abc"));
-            additions.Add(Simulate.Post("blog1", "123"));
-            additions.Add(Simulate.Post("blog1", "xyz"));
-
-            var results = table.Add(additions);
-
-            foreach(var result in results)
-                Assert.AreEqual(201, result.HttpStatusCode);
-        }
-
 
     }
 }

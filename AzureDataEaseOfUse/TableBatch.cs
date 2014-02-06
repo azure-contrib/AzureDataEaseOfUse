@@ -18,7 +18,9 @@ namespace AzureDataEaseOfUse
 
         public readonly CloudTable Table;
 
-        Dictionary<string, List<TableBatchOperation>> Directory;
+        Dictionary<string, List<TableBatchOperation>> Directory = new Dictionary<string,List<TableBatchOperation>>();
+
+        //TODO: Change to FlyWheel (async)
 
         #region CRUD Operations
 
@@ -113,11 +115,7 @@ namespace AzureDataEaseOfUse
             var results = new List<TableResult>();
 
             foreach (var batch in batches)
-            {
-                var result = Table.ExecuteBatch(batch);
-
-                results.AddRange(result);
-            }
+                results.AddRange(Table.ExecuteBatch(batch));
 
             return results;
         }
@@ -129,21 +127,12 @@ namespace AzureDataEaseOfUse
             var results = new List<Task<IList<TableResult>>>();
 
             foreach (var batch in batches)
-            {
-                var result = Table.ExecuteBatchAsync(batch);
-
-                results.Add(result);
-            }
+                results.Add(Table.ExecuteBatchAsync(batch));
 
             return results;           
         }
 
         #endregion
-
-
-
-
-
 
     }
 }

@@ -27,27 +27,14 @@ namespace AzureDataEaseOfUse.Tables
             return result;
         }
 
-        public static List<TableResult> Add<T>(this CloudTable table, List<T> items) where T : TableEntity, IAzureStorageTable
-        {
-            
-            foreach(var item in items)
-                item.SyncKeysOnRow();
-
-            //TODO: Add check to ensure partition & row key naming conforms to requirements
-
-            var batch = new TableBatchOperation();
-
-            foreach (var item in items)
-                batch.Insert(item);
-
-            var result = table.ExecuteBatch(batch);
-
-            return result.ToList();
-        }
-
         #endregion
 
         #region Retrieval
+
+        public static T Get<T>(this CloudTable table, IAzureStorageTable item) where T : TableEntity, IAzureStorageTable
+        {
+            return table.Get<T>(item.GetTableKeys());
+        }
 
         public static T Get<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity, IAzureStorageTable
         {
@@ -74,9 +61,9 @@ namespace AzureDataEaseOfUse.Tables
             return results;
         }
 
-        public static IQueryable<T> Where<T>(this CloudTable table, Expression<Func<T, bool>> predicate) where T : TableEntity, IAzureStorageTable, new()
+        public static List<T> Where<T>(this CloudTable table, Expression<Func<T, bool>> predicate) where T : TableEntity, IAzureStorageTable, new()
         {
-            return table.CreateQuery<T>().Where(predicate);
+            return table.CreateQuery<T>().Where(predicate).ToList();
         }
 
         #endregion
