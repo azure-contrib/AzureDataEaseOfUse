@@ -71,6 +71,7 @@
     <Compile Include="Tables.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AzureDataEaseOfUse.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>AzureDataEaseOfUse</id>
+    <version>0.1.01-beta</version>
+    <title>Azure Data Ease Of Use</title>
+    <authors>Randy Skopecek</authors>
+    <owners>rskopecek</owners>
+    <licenseUrl>https://github.com/WindowsAzure-Contrib/AzureDataEaseOfUse/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/WindowsAzure-Contrib/AzureDataEaseOfUse</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Less code for Azure Storage and Caching. MIT Licensed.</description>
+    <releaseNotes>Table crud, search, and batch added</releaseNotes>
+    <copyright>Randy Skopecek 2014</copyright>
+    <dependencies>
+      <dependency id="WindowsAzure.Storage" version="3.0.2.0" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="2.0.3" />
+    </dependencies>
+  </metadata>
+</package>
