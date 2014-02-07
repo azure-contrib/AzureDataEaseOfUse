@@ -5,7 +5,7 @@ Intention: Less code developing with Azure storage and caching
 
 Subtext: Intended to be somewhat opinionated, but allow overrides for most alterations
 
-Currently only Tables are developed against, and still have a bit of work to go. After more work, a NuGet package will probably be created. Most all methods are synchronous except batch. It should change in the future to be async first as it is the appropriate style for api calls. However, it is more common for devs to use sync methods as it is more easily understood. Sync/Async will be split up by namespace to remove the "Async" postpended naming clutter.
+Currently only Tables are developed against, and still have a bit of work to go.  Most all methods are synchronous except batch. It should change in the future to be async first as it is the appropriate style for api calls. However, it is more common for devs to use sync methods as it is more easily understood. Sync/Async will be split up by namespace to remove the "Async" postpended naming clutter.
 
 Most all functionality is "extended", not created (batches are the exception). This way you don't lose much of the bare metal control. Just gain simplicity.
 
@@ -18,38 +18,47 @@ MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 Getting Started
 ==========
 
-*** Temp: Currently have to copy classes into your project.  NuGet package to follow eventually.
-
-Add namespaces
-```csharp    
-    using AzureDataEaseOfUse;
-    using AzureDataEaseOfUse.Tables;
+Install from NuGet:
+```
+PM> Install-Package AzureDataEaseOfUse -Pre
 ```
 
 Add AppSetting
+
 ```csharp
-    <add key ="DefaultStorageConnectionString" value ="[your connection]"/>
+<add key ="DefaultStorageConnectionString" value ="DefaultEndpointsProtocol=https;AccountName=[name];AccountKey=[key];"/>
 ```
 
-Pretend connect to Azure Storage
-```csharp 
-    // Kick off will change in the future, but nothing major
-    var azure = Storage.Connect();
-    
-    // or override connection string name
-    var azure = Storage.Connect("my_specific_name");
+Add namespaces
+
+```csharp    
+using AzureDataEaseOfUse;
+using AzureDataEaseOfUse.Tables;
 ```
 
 Your objects
+
 ```csharp 
-    class Mine : TableEntity, IAzureStorageTable
-    {
-        // your stuff
-    
-        public string GetPartitionKey() {}
-        public string GetRowKey() {}
-    }
+class Mine : TableEntity, IAzureStorageTable
+{
+    // your stuff
+
+    public string GetPartitionKey() {}
+    public string GetRowKey() {}
+}
 ```
+
+Connect to Azure Storage
+
+```csharp 
+// Kick off will change in the future, but nothing major
+var azure = Storage.Connect();
+    
+// or override connection string name
+var azure = Storage.Connect("my_specific_name");
+```
+
+rock and roll
 
 Simple CRUD
 -----------
