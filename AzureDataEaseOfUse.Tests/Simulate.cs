@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
-using AzureDataEaseOfUse.Tables;
+using AzureDataEaseOfUse.Tables.Async;
 
 namespace AzureDataEaseOfUse
 {
@@ -16,9 +16,9 @@ namespace AzureDataEaseOfUse
             return "t" + Guid.NewGuid().ToString().Replace("-", "").ToLower();
         }
 
-        public static CloudTable Table()
+        public async static Task<CloudTable> Table()
         {
-            return Storage.Connect().Table(TableName());
+            return await Storage.Connect().Table(TableName());
         }
 
         public static ExamplePost Post(string blogId = null, string title = "Cool Beans")
@@ -35,9 +35,9 @@ namespace AzureDataEaseOfUse
         /// <summary>
         /// Creates a, b, and c partitions with 1, 2, and 3 rows
         /// </summary>
-        public static CloudTable FilledTable()
+        public async static Task<CloudTable> FilledTable()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var batch = table.Batch<ExamplePost>();
 
             for (int x = 1; x <= 3; x++)

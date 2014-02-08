@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
-using AzureDataEaseOfUse.Tables;
+using AzureDataEaseOfUse.Tables.Async;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
     public class TableBatch<T> where T : TableEntity, IAzureStorageTable
     {

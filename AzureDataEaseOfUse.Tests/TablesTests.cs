@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using AzureDataEaseOfUse;
-using AzureDataEaseOfUse.Tables;
+using AzureDataEaseOfUse.Tables.Async;
 
 namespace AzureDataEaseOfUse.Tests
 {
@@ -42,12 +43,12 @@ namespace AzureDataEaseOfUse.Tests
         #region Reset Tests
 
         [ClassCleanup()]
-        public static void Cleanup() 
+        public async static void Cleanup() 
         {
             var azure = Storage.Connect();
 
             foreach (var table in azure.Tables())
-                table.Delete(true);
+                await table.Delete(true);
         }
 
         #endregion
@@ -55,43 +56,43 @@ namespace AzureDataEaseOfUse.Tests
         #region Add, Update, Delete
 
         [TestMethod]
-        public void Can_Add_Item()
+        public async Task Can_Add_Item()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
 
-            var result = table.Add(Simulate.Post());
+            var result = await table.Add(Simulate.Post());
 
             Assert.AreEqual(204, result.HttpStatusCode);
         }
 
 
         [TestMethod]
-        public void Can_Update_Item()
+        public async Task Can_Update_Item()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var original = Simulate.Post();
 
-            table.Add(original);
+            await table.Add(original);
 
-            var updated = table.Get<ExamplePost>(original);
+            var updated = await table.Get<ExamplePost>(original);
 
             updated.Posted = original.Posted.AddDays(3);
 
-            var result = table.Update(updated);
+            var result = await table.Update(updated);
 
             Assert.AreEqual(204, result.HttpStatusCode);
         }
 
 
         [TestMethod]
-        public void Can_Delete_Item()
+        public async Task Can_Delete_Item()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var post = Simulate.Post();
 
-            table.Add(post);
-
-            var result = table.Delete(post);
+            await table.Add(post);
+            
+            var result = await table.Delete(post);
 
             Assert.AreEqual(204, result.HttpStatusCode);
         }
@@ -101,22 +102,22 @@ namespace AzureDataEaseOfUse.Tests
         #region Get & List
 
         [TestMethod]
-        public void Can_Get_Item()
+        public async Task Can_Get_Item()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var post = Simulate.Post();
 
-            table.Add(post);
+            await table.Add(post);
 
-            var result = table.Get<ExamplePost>(post.PartitionKey, post.RowKey);
+            var result = await table.Get<ExamplePost>(post.PartitionKey, post.RowKey);
 
             Assert.AreEqual(post.Posted, result.Posted);
         }
 
         [TestMethod]
-        public void Can_List_Items()
+        public async Task Can_List_Items()
         {
-            var table = Simulate.FilledTable();
+            var table = await Simulate.FilledTable();
 
             var results = table.List<ExamplePost>("a");
 
@@ -128,9 +129,9 @@ namespace AzureDataEaseOfUse.Tests
         #region Search
 
         [TestMethod]
-        public void Can_Search_Items_By_Row_Key_Equals()
+        public async Task Can_Search_Items_By_Row_Key_Equals()
         {
-            var table = Simulate.FilledTable();
+            var table = await Simulate.FilledTable();
 
             var results = table.Where<ExamplePost>(q => q.RowKey == "2");
 
@@ -139,9 +140,9 @@ namespace AzureDataEaseOfUse.Tests
 
 
         [TestMethod]
-        public void Can_Search_Items_By_Column_Equal()
+        public async Task Can_Search_Items_By_Column_Equal()
         {
-            var table = Simulate.FilledTable();
+            var table = await Simulate.FilledTable();
 
             var results = table.Where<ExamplePost>(q => q.Amount == 3);
 
@@ -149,9 +150,9 @@ namespace AzureDataEaseOfUse.Tests
         }
 
         [TestMethod]
-        public void Can_Search_Items_By_Column_Range()
+        public async Task Can_Search_Items_By_Column_Range()
         {
-            var table = Simulate.FilledTable();
+            var table = await Simulate.FilledTable();
 
             var results = table.Where<ExamplePost>(q => q.Amount < 4);
 
@@ -160,9 +161,9 @@ namespace AzureDataEaseOfUse.Tests
 
 
         [TestMethod]
-        public void Can_Search_Items_By_Row_And_Column()
+        public async Task Can_Search_Items_By_Row_And_Column()
         {
-            var table = Simulate.FilledTable();
+            var table = await Simulate.FilledTable();
 
             var results = table.Where<ExamplePost>(q => q.RowKey == "2" && q.Amount < 4);
 
@@ -174,9 +175,9 @@ namespace AzureDataEaseOfUse.Tests
         #region Batch
 
         [TestMethod]
-        public void Can_Batch_Add_Items()
+        public async Task Can_Batch_Add_Items()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var batch = table.Batch<ExamplePost>();
 
             for (int x = 1; x <= 5; x++)
@@ -189,9 +190,9 @@ namespace AzureDataEaseOfUse.Tests
         }
 
         [TestMethod]
-        public void Can_Batch_Add_Over_100_Items_Same_Partion_Key()
+        public async Task Can_Batch_Add_Over_100_Items_Same_Partion_Key()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var batch = table.Batch<ExamplePost>();
 
             for (int x = 1; x <= 110; x++)
@@ -204,9 +205,9 @@ namespace AzureDataEaseOfUse.Tests
         }
 
         [TestMethod]
-        public void Can_Batch_Different_Partitions()
+        public async Task Can_Batch_Different_Partitions()
         {
-            var table = Simulate.Table();
+            var table = await Simulate.Table();
             var batch = table.Batch<ExamplePost>();
 
             batch.Add(Simulate.Post("a"));

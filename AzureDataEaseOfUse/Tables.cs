@@ -6,15 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using AzureDataEaseOfUse.Tables;
 
-namespace AzureDataEaseOfUse.Tables
+namespace AzureDataEaseOfUse.Tables.Async
 {
     public static class TablesExtensions
     {
 
         #region Add
 
-        public static TableResult Add<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
+        public async static Task<TableResult> Add<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
         {
             item.SyncKeysOnRow();
 
@@ -22,7 +23,7 @@ namespace AzureDataEaseOfUse.Tables
 
             var operation = TableOperation.Insert(item);
 
-            var result = table.Execute(operation);
+            var result = await table.ExecuteAsync(operation);
 
             return result;
         }
@@ -31,29 +32,32 @@ namespace AzureDataEaseOfUse.Tables
 
         #region Retrieval
 
-        public static T Get<T>(this CloudTable table, IAzureStorageTable item) where T : TableEntity, IAzureStorageTable
+        public async static Task<T> Get<T>(this CloudTable table, IAzureStorageTable item) where T : TableEntity, IAzureStorageTable
         {
-            return table.Get<T>(item.GetTableKeys());
+            return await table.Get<T>(item.GetTableKeys());
         }
 
-        public static T Get<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity, IAzureStorageTable
+        public async static Task<T> Get<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity, IAzureStorageTable
         {
             var keys = new TableKeys(partitionKey, rowKey);
 
-            return table.Get<T>(keys);
+            return await table.Get<T>(keys);
         }
 
-        public static T Get<T>(this CloudTable table, TableKeys keys) where T : TableEntity, IAzureStorageTable
+        public async static Task<T> Get<T>(this CloudTable table, TableKeys keys) where T : TableEntity, IAzureStorageTable
         {
             var operation = TableOperation.Retrieve<T>(keys.PartitionKey, keys.RowKey);
 
-            var value = table.Execute(operation);
+            var value = await table.ExecuteAsync(operation);
 
             var result = (T)value.Result;
 
             return result;
         }
 
+        /// <summary>
+        /// [Synchronous execution]
+        /// </summary>
         public static List<T> List<T>(this CloudTable table, string partitionKey) where T : TableEntity, IAzureStorageTable, new()
         {
             var results = table.Where<T>(q => q.PartitionKey == partitionKey).ToList();
@@ -61,6 +65,9 @@ namespace AzureDataEaseOfUse.Tables
             return results;
         }
 
+        /// <summary>
+        /// [Synchronous execution]
+        /// </summary>
         public static List<T> Where<T>(this CloudTable table, Expression<Func<T, bool>> predicate) where T : TableEntity, IAzureStorageTable, new()
         {
             return table.CreateQuery<T>().Where(predicate).ToList();
@@ -70,13 +77,13 @@ namespace AzureDataEaseOfUse.Tables
 
         #region Update
 
-        public static TableResult Update<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
+        public async static Task<TableResult> Update<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
         {
             item.SyncKeysOnRow();
             
             var operation = TableOperation.Replace(item);
 
-            var result = table.Execute(operation);
+            var result = await table.ExecuteAsync(operation);
 
             return result;
         }
@@ -85,20 +92,20 @@ namespace AzureDataEaseOfUse.Tables
 
         #region Deletion
 
-        public static TableResult Delete<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
+        public async static Task<TableResult> Delete<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
         {
             item.SyncKeysOnRow();
 
             var operation = TableOperation.Delete(item);
 
-            var result = table.Execute(operation);
+            var result = await table.ExecuteAsync(operation);
 
             return result;
         }
 
-        public static bool Delete(this CloudTable table, bool confirm)
+        public async static Task<bool> Delete(this CloudTable table, bool confirm)
         {
-            return confirm ? table.DeleteIfExists() : false;
+            return confirm ? await table.DeleteIfExistsAsync() : false;
         }
 
         #endregion
@@ -110,26 +117,29 @@ namespace AzureDataEaseOfUse.Tables
 
         #region Table(s)
 
+        /// <summary>
+        /// [Synchronous execution]
+        /// </summary>
         public static IEnumerable<CloudTable> Tables(this CloudStorageAccount account, string prefix = null)
         {
             var client = account.CreateCloudTableClient();
-
+            
             var tables = client.ListTables(prefix);
 
             return tables;
         }
 
 
-        public static CloudTable Table(this CloudStorageAccount account, string name, bool createIfNotExists = true)
+        public async static Task<CloudTable> Table(this CloudStorageAccount account, string name, bool createIfNotExists = true)
         {
             //TODO: Add check to ensure table name conforms to requirements
 
             var client = account.CreateCloudTableClient();
 
             var table = client.GetTableReference(name);
-
+            
             if (createIfNotExists)
-                table.CreateIfNotExists();
+                await table.CreateIfNotExistsAsync();
 
             return table;
         }
@@ -137,7 +147,7 @@ namespace AzureDataEaseOfUse.Tables
         #endregion
 
         /// <summary>
-        /// Ensures the PartitionKey & Row Keys are set on item
+        /// Ensures the PartitionKey and Row Keys are set on item
         /// </summary>
         public static void SyncKeysOnRow<T>(this T item) where T : TableEntity, IAzureStorageTable
         {
