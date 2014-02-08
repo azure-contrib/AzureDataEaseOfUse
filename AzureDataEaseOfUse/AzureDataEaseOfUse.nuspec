@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>AzureDataEaseOfUse</id>
-    <version>0.1.2-beta</version>
+    <version>0.1.4-beta</version>
     <title>Azure Data Ease Of Use</title>
     <authors>Randy Skopecek</authors>
     <owners>rskopecek</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/WindowsAzure-Contrib/AzureDataEaseOfUse</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Less code for Azure Storage and Caching. MIT Licensed.</description>
-    <releaseNotes>Table crud, search, and batch added</releaseNotes>
+    <releaseNotes>Switched Crud Ops to Async</releaseNotes>
     <copyright>Randy Skopecek 2014</copyright>
     <dependencies>
       <dependency id="WindowsAzure.Storage" version="3.0.2.0" />
