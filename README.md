@@ -1,15 +1,11 @@
-AzureDataEaseOfUse
-==================
+Intention: Less code developing against storage and caching
 
-Intention: Less code developing with Azure storage and caching
-
-Subtext: Intended to be somewhat opinionated, but allow overrides for most alterations
-
-Currently only Tables are developed against, and still have a bit of work to go.  Most all methods are synchronous except batch. It should change in the future to be async first as it is the appropriate style for api calls. However, it is more common for devs to use sync methods as it is more easily understood. Sync/Async will be split up by namespace to remove the "Async" postpended naming clutter.
-
-Most all functionality is "extended", not created (batches are the exception). This way you don't lose much of the bare metal control. Just gain simplicity.
-
-Crud ops, batch, and search are tested against live Azure.  Batch and search still need vetting.
+* Intended to be somewhat opinionated, but allow overrides for most alterations
+* Currently only Tables are developed against, and still have a bit of work to go.
+* Most all methods are Async since all of the interaction is with a web api.
+* A synchronous namespace will be added to add ease of use
+* Most all functionality is currently "extended", not created (batches are the exception). This way you don't lose much of the bare metal control. Just gain simplicity.
+* Tests run against live Azure
 
 MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
@@ -33,7 +29,8 @@ Add namespaces
 
 ```csharp    
 using AzureDataEaseOfUse;
-using AzureDataEaseOfUse.Tables;
+using AzureDataEaseOfUse.Tables; //temp: needed for batches
+using AzureDataEaseOfUse.Tables.Async;
 ```
 
 Your objects
@@ -60,32 +57,22 @@ var azure = Storage.Connect("my_specific_name");
 
 rock and roll
 
-Simple CRUD
+Aww Crud
 -----------
 ```csharp 
-    azure.Table("MyTable").Add(stuff);
-    
-    azure.Table("MyTable").Get<ExamplePost>("partition", "row");
-    
-    azure.Table("MyTable").Update(stuff);
-     
-    azure.Table("MyTable").Delete(stuff);
-```
-or save more time
-```csharp 
-    var table = azure.Table("MyTable");
+    var table = await azure.Table("MyTable");
 
-    table.Add(stuff);
+    await table.Add(stuff);
     
-    table.Get<ExamplePost>("partition", "row");
+    await table.Get<ExamplePost>("partition", "row");
     
-    table.Update(stuff);
+    await table.Update(stuff);
      
-    table.Delete(stuff);
+    await table.Delete(stuff);
 ```
 or 1 line add (or update/delete/etc)
 ```csharp
-    Storage.Connect().Table("Posts").Add(entry);
+    await Storage.Connect().Table("Posts").Add(entry);
 ```
 
 List and Search
@@ -136,10 +123,7 @@ Tables
     azure.Tables();
 
     azure.Tables("prefix");
-    
-    // Get Partition and Row keys in 1 shot
-    table.GetTableKeys();
-    
+
 ```
 
 Best Practices
