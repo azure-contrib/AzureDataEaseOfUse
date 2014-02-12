@@ -172,51 +172,36 @@ namespace AzureDataEaseOfUse.Tests
 
         #endregion
 
-        #region Batch
+        #region Flywheel (aka Batch)
 
         [TestMethod]
         public async Task Can_Batch_Add_Items()
         {
             var table = await Simulate.Table();
-            var batch = table.Batch<ExamplePost>();
+            var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
 
             for (int x = 1; x <= 5; x++)
-                batch.Add(Simulate.Post("a", x.ToString()));
+                flywheel.Insert(Simulate.Post("a", x.ToString()));
 
-            var results = batch.Execute();
+            flywheel.Flush();
 
-            foreach(var result in results)
-                Assert.AreEqual(201, result.HttpStatusCode);
+            Assert.AreEqual(0, flywheel.Errors.Count);
+            Assert.AreEqual(5, flywheel.SuccessCount);
         }
 
         [TestMethod]
-        public async Task Can_Batch_Add_Over_100_Items_Same_Partion_Key()
+        public async Task Can_Batch_Add_1000_Items_Same_Partition()
         {
             var table = await Simulate.Table();
-            var batch = table.Batch<ExamplePost>();
+            var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
 
-            for (int x = 1; x <= 110; x++)
-                batch.Add(Simulate.Post("a", x.ToString()));
+            for (int x = 1; x <= 1000; x++)
+                flywheel.Insert(Simulate.Post("a", x.ToString()));
 
-            var results = batch.Execute();
+            flywheel.Flush();
 
-            foreach (var result in results)
-                Assert.AreEqual(201, result.HttpStatusCode);
-        }
-
-        [TestMethod]
-        public async Task Can_Batch_Different_Partitions()
-        {
-            var table = await Simulate.Table();
-            var batch = table.Batch<ExamplePost>();
-
-            batch.Add(Simulate.Post("a"));
-            batch.Add(Simulate.Post("b"));
-
-            var results = batch.Execute();
-
-            foreach (var result in results)
-                Assert.AreEqual(201, result.HttpStatusCode);
+            Assert.AreEqual(0, flywheel.Errors.Count);
+            Assert.AreEqual(1000, flywheel.SuccessCount);
         }
 
         #endregion

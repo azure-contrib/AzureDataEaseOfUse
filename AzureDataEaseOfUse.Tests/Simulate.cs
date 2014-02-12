@@ -38,18 +38,19 @@ namespace AzureDataEaseOfUse
         public async static Task<CloudTable> FilledTable()
         {
             var table = await Simulate.Table();
-            var batch = table.Batch<ExamplePost>();
+
+            var flywheel = table.Flywheel<ExamplePost>();
 
             for (int x = 1; x <= 3; x++)
-                batch.Add(Simulate.Post("a", x.ToString()));
+                flywheel.Insert(Simulate.Post("a", x.ToString()));
 
             for (int x = 1; x <= 3; x++)
-                batch.Add(Simulate.Post("b", x.ToString()));
+                flywheel.Insert(Simulate.Post("b", x.ToString()));
 
             for (int x = 1; x <= 3; x++)
-                batch.Add(Simulate.Post("c", x.ToString()));
+                flywheel.Insert(Simulate.Post("c", x.ToString()));
 
-            batch.Execute();
+            flywheel.Flush();
 
             return table;
         

@@ -63,17 +63,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IAzureStorageTable.cs" />
+    <Compile Include="Tables\Flywheel\FlywheelError.cs" />
+    <Compile Include="Tables\Flywheel\FlywheelResult.cs" />
+    <Compile Include="Tables\IAzureStorageTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage.cs" />
-    <Compile Include="TableBatch.cs" />
-    <Compile Include="TableKeys.cs" />
-    <Compile Include="Tables.cs" />
+    <Compile Include="Tables\TableBatch.cs" />
+    <Compile Include="Tables\Flywheel\TableFlywheel.cs" />
+    <Compile Include="Tables\Flywheel\TableFlywheelOperation.cs" />
+    <Compile Include="Tables\TableExtensions.cs" />
+    <Compile Include="Tables\TableKeys.cs" />
+    <Compile Include="Tables\Tables.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AzureDataEaseOfUse.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
