@@ -60,28 +60,48 @@ List and Search
     table.Where<ExamplePost>(q => q.BlogId == "MinePlease");
 ```
 
-Batches
--------
+Flywheel (aka managed batch)
+----------------------------
 
-Most batch commands return the batch object to allow declarative continuation.
+* Auto partitions into batches
+* Auto executes/flushes batches when full as Async Task to prevent blocking
+* Processes results on flush (blocking)
+* Does not care how many items are executed
+* Can be used as a crud firehose
 
 ```csharp 
-    var batch = table.Batch<ExamplePost>();
-    
-    batch.Add(stuff).Update(stuff2).Delete(stuff3).Get("partition","row").Execute();
-    
-    batch.Add(stuff).Update(stuff2).ExecuteAsync();
-```
+    var flywheel = table.Flywheel<ExamplePost>();
 
-Batches auto-provision TableBatchOperations under the hood, by partition key and 100 count.  Aka encapsulating you, a bit, from some mechanics of Azure Storage Tables.
-```csharp 
     for (int x = 1; x < N; x++)
-      batch.Add(random_Stuff_For_Random_Blog);
+    {
+        flywheel.Insert(stuff);
+        flywheel.Replace(even_more_stuff); // results placed into .Retreived
+        flywheel.Delete(hording_lots_of_stuff);
+        
+        flywheel.Retrieve("partition", "row");
 
-    batch.ExecuteAsync();
-    
-    batch.Execute();
+        flywheel.InsertOrReplace(stuff);
+        flywheel.Merge(stuff);
+        flywheel.InsertOrMerge(stuff);
+
+        // auto flushes every time a [partition]-[ischange] batch is full
+    }
+
+    flywheel.Flush(); // sends unfull batches. waits for results. processes outcomes
 ```
+
+Outcomes
+
+```csharp 
+    // Reflect on outcomes
+    if(flywheel.HasErrors)
+        DoSomethingWith(flywheel.Errors);
+        
+    flywheel.Retreived; // List<T> of results from .Retrieve()
+    flywheel.SuccessCount;    
+    
+```
+
 
 Tables
 -----------
