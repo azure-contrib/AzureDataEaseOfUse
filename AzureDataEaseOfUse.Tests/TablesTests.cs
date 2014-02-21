@@ -174,35 +174,53 @@ namespace AzureDataEaseOfUse.Tests
 
         #region Flywheel (aka Batch)
 
-        [TestMethod]
-        public async Task Can_Batch_Add_Items()
-        {
-            var table = await Simulate.Table();
-            var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
+        //[TestMethod]
+        //public async Task Can_Batch_Add_Items()
+        //{
+        //    var table = await Simulate.Table();
+        //    var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
 
-            for (int x = 1; x <= 5; x++)
-                flywheel.Insert(Simulate.Post("a", x.ToString()));
+        //    for (int x = 1; x <= 5; x++)
+        //        flywheel.Insert(Simulate.Post("a", x.ToString()));
 
-            flywheel.Flush();
+        //    flywheel.Flush();
 
-            Assert.AreEqual(0, flywheel.Errors.Count);
-            Assert.AreEqual(5, flywheel.SuccessCount);
-        }
+        //    Assert.AreEqual(0, flywheel.Errors.Count);
+        //    Assert.AreEqual(5, flywheel.SuccessCount);
+        //}
 
-        [TestMethod]
-        public async Task Can_Batch_Add_1000_Items_Same_Partition()
-        {
-            var table = await Simulate.Table();
-            var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
+        //[TestMethod]
+        //public async Task Can_Batch_Add_1000_Items_Same_Partition()
+        //{
+        //    var flywheel = Simulate.Flywheel();
 
-            for (int x = 1; x <= 1000; x++)
-                flywheel.Insert(Simulate.Post("a", x.ToString()));
+        //    for (int x = 1; x <= 1000; x++)
+        //        flywheel.Insert(Simulate.Post("a", x.ToString()));
 
-            flywheel.Flush();
+        //    foreach (var item in Simulate.Posts(1, 200))
+        //        flywheel.Insert(item);
 
-            Assert.AreEqual(0, flywheel.Errors.Count);
-            Assert.AreEqual(1000, flywheel.SuccessCount);
-        }
+        //    flywheel.Flush();
+
+        //    Assert.AreEqual(0, flywheel.Errors.Count);
+        //    Assert.AreEqual(1000, flywheel.SuccessCount);
+        //}
+
+
+        //[TestMethod]
+        //public async Task Can_Batch_Add_1000_Items_Over_Mulitiple_Partitions()
+        //{
+        //    var table = await Simulate.Table();
+        //    var flywheel = table.Flywheel<ExamplePost>(autoFlush: false);
+
+        //    foreach (var item in Simulate.Posts(3, 5))
+        //        flywheel.Insert(item);
+
+        //    flywheel.Flush();
+
+        //    Assert.AreEqual(0, flywheel.Errors.Count);
+        //    Assert.AreEqual(1000, flywheel.SuccessCount);
+        //}
 
         #endregion
 

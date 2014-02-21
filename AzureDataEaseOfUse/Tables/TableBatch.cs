@@ -21,7 +21,7 @@ namespace AzureDataEaseOfUse.Tables
     {
         public TableBatch(FlywheelOperation<T> firstItem)
         {
-            this.PartitionKey = firstItem.Item.PartitionKey;
+            this.PartitionKey = firstItem.PartitionKey;
             this.IsChange = firstItem.IsChange;
 
             Include(firstItem);
@@ -78,7 +78,7 @@ namespace AzureDataEaseOfUse.Tables
         {
             return (
                 operation.IsChange == IsChange &&
-                operation.Item.PartitionKey == PartitionKey &&
+                operation.PartitionKey == PartitionKey &&
                 Batches.Count < 100);
         }
 

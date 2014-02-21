@@ -19,7 +19,7 @@ namespace AzureDataEaseOfUse.Tables.Async
         public TableFlywheel(CloudTable table)
         {
             this.Table = table;
-            this.RetrieveResults = new List<T>();
+            this.Retrieved = new List<T>();
             this.Errors = new List<FlywheelError<T>>();
         }
 
@@ -29,11 +29,38 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         List<FlywheelResult<T>> Executing = new List<FlywheelResult<T>>();
 
-        public readonly List<T> RetrieveResults;
+        public readonly List<T> Retrieved;
 
         public readonly List<FlywheelError<T>> Errors;
 
         public long SuccessCount { get; private set; }
+
+        /// <summary>
+        /// Count of Batches Pending Transmission
+        /// </summary>
+        public int PendingCount()
+        {
+            int count = 0;
+
+            foreach (var partition in Pending)
+                count += partition.Value.Count;
+
+            return count;
+        }
+
+        /// <summary>
+        /// Count of all the executing change/retrieves (not count of batches)
+        /// </summary>
+        public int ExecutingCount()
+        { 
+            int count = 0;
+
+            foreach (var item in Executing)
+                count += item.Batch.Count;
+
+            return count;
+        }
+
 
         #region CRUD Operations
 
@@ -106,7 +133,7 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         private List<TableBatch<T>> GetFlywheelPartition(FlywheelOperation<T> request)
         {
-            var key = GetFlywheelPartitionKey(request.Item.PartitionKey, request.IsChange);
+            var key = GetFlywheelPartitionKey(request.PartitionKey, request.IsChange);
 
             return GetFlywheelPartition(key);
         }
@@ -181,6 +208,8 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         #endregion
 
+        public bool HasErrors { get { return Errors.Count > 0; } }
+
         /// <summary>
         /// Waits for all flushed results to finish
         /// </summary>
@@ -202,7 +231,7 @@ namespace AzureDataEaseOfUse.Tables.Async
             {
                 item.ProcessResults();
 
-                RetrieveResults.AddRange(item.RetrieveResults);
+                Retrieved.AddRange(item.RetrieveResults);
 
                 Errors.AddRange(item.Errors);
 
@@ -212,41 +241,6 @@ namespace AzureDataEaseOfUse.Tables.Async
             }
         }
 
-
-
-
-
-
-
-        //public List<TableResult> Successful(bool autoWait = true)
-        //{
-        //    if (autoWait)
-        //        Wait();
-
-        //    var tableResults = new List<TableResult>();
-
-        //    var batches = Executing
-        //                        .Where(q => q.TableTask.IsCompleted 
-        //                            && !q.TableTask.IsCanceled && !q.TableTask.IsFaulted)
-        //                        .Select(s => s.TableTask.Result).ToList();
-
-        //    foreach (var batch in batches)
-        //        foreach (var result in batch)
-        //            if (result.HttpStatusCode >= 200 && result.HttpStatusCode < 300)
-        //                tableResults.Add(result);
-
-        //    return tableResults;
-        //}
-
-        //public List<FlywheelResult<T>> FailedOrCancelled(bool autoWait = true)
-        //{
-        //    if (autoWait)
-        //        Wait();
-
-        //    var failed = Executing.Where(q => q.TableTask.IsCompleted && (q.TableTask.IsCanceled || q.TableTask.IsFaulted)).ToList();
-
-        //    return failed;
-        //}
 
     }
 }

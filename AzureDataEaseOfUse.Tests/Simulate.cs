@@ -5,9 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
 using AzureDataEaseOfUse.Tables.Async;
+using AzureDataEaseOfUse;
 
 namespace AzureDataEaseOfUse
 {
+
+    public enum FillTable { Empty, OnePartition, TwoPartitions }
+
     public static class Simulate
     {
 
@@ -21,6 +25,34 @@ namespace AzureDataEaseOfUse
             return await Storage.Connect().Table(TableName());
         }
 
+        public static TableFlywheel<ExamplePost> Flywheel()
+        {
+            var tableTask = Table();
+
+            tableTask.Wait();
+
+            var flywheel = tableTask.Result.Flywheel<ExamplePost>();
+
+            return flywheel;
+        }
+
+
+        public static List<ExamplePost> Posts(int partitionCount, int rowCount)
+        {
+            var items = new List<ExamplePost>();
+
+            for (int b = 1; b <= partitionCount; b++)
+                for (int x = 1; x <= rowCount; x++)
+                    items.Add(Post(b.ToString(), x.ToString()));
+
+            return items;
+        }
+
+        public static ExamplePost Post(int partition, int row)
+        {
+            return Post(partition.ToString(), row.ToString());
+        }
+
         public static ExamplePost Post(string blogId = null, string title = "Cool Beans")
         {
             return new ExamplePost()
@@ -30,6 +62,26 @@ namespace AzureDataEaseOfUse
                 Title = title,
                 Amount = 3
             };
+        }
+
+        public static TableFlywheel<ExamplePost> Filled(this TableFlywheel<ExamplePost> flywheel, int partitions, int rows)
+        {
+            flywheel.Table.Filled(partitions, rows);
+
+            return flywheel;
+        }
+
+        public static CloudTable Filled(this CloudTable table, int partitions, int rows)
+        {
+            var flywheel = table.Flywheel<ExamplePost>();
+
+            for (var partition = 1; partition <= partitions; partition++)
+                for (int row = 1; row <= rows; row++)
+                    flywheel.Insert(Simulate.Post(partition.ToString(), row.ToString()));
+
+            flywheel.Flush();
+
+            return table;
         }
 
         /// <summary>

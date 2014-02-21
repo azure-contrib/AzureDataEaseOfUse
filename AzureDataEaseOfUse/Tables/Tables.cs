@@ -55,6 +55,40 @@ namespace AzureDataEaseOfUse.Tables.Async
             return result;
         }
 
+        //public async static Task<List<T>> Get<T>(this CloudTable table, string partitionKey, params string[] rowKeys) where T : TableEntity, IAzureStorageTable
+        //{
+        //    var results = new List<T>();
+
+        //    var batch = new TableBatchOperation();
+            
+        //    foreach (var rowKey in rowKeys)
+        //    {
+        //        batch.Retrieve<T>(partitionKey, rowKey);
+
+
+        //        if (batch.IsFull())
+        //        {
+        //            var items = await table.ExecuteBatchAsync(batch);
+
+        //            foreach (var item in items)
+        //            {
+        //                if (item.IsSuccessful())
+        //                    results.Add((T)item.Result);                    
+        //            }
+                    
+        //            batch = new TableBatchOperation();
+        //        }
+        //    }
+
+        //    return results;
+        //}
+
+        public static bool IsFull(this TableBatchOperation batch)
+        {
+            return batch.Count == 100;
+        }
+
+
         /// <summary>
         /// [Synchronous execution]
         /// </summary>
@@ -141,7 +175,7 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         #endregion
 
-        public static TableFlywheel<T> Flywheel<T>(this CloudTable table, bool autoFlush = true) where T : TableEntity, IAzureStorageTable
+        public static TableFlywheel<T> Flywheel<T>(this CloudTable table) where T : TableEntity, IAzureStorageTable
         {
             return new TableFlywheel<T>(table);
         }

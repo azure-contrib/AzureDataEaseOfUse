@@ -19,7 +19,10 @@ namespace AzureDataEaseOfUse.Tables.Async
             this.OperationType = operationType;
             
             this.IsChange = operationType != TableOperationType.Retrieve;
-   
+
+            this.PartitionKey = item.PartitionKey;
+            this.RowKey = item.RowKey;
+
             switch(operationType)
             {
                 case TableOperationType.Retrieve: this.Operation = TableOperation.Retrieve(item.PartitionKey, item.RowKey); break;
@@ -39,7 +42,9 @@ namespace AzureDataEaseOfUse.Tables.Async
         {
             this.IsChange = false;
             this.OperationType = TableOperationType.Retrieve;
-            this.Operation = TableOperation.Retrieve(partitionKey, rowKey);
+            this.Operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            this.PartitionKey = partitionKey;
+            this.RowKey = rowKey;
         }
 
 
@@ -47,6 +52,10 @@ namespace AzureDataEaseOfUse.Tables.Async
         public  bool IsChange { get; private set; }
         public  TableOperation Operation { get; private set; }
         public TableOperationType OperationType { get; private set; }
+
+        public string PartitionKey { get; private set; }
+
+        public string RowKey { get; private set; }
         
     }
 }
