@@ -66,8 +66,6 @@ Flywheel (aka managed batch)
 * Auto partitions into batches
 * Auto executes/flushes batches when full as Async Task to prevent blocking
 * Processes results on flush (blocking)
-* Does not care how many items are executed
-* Can be used as a crud firehose
 
 ```csharp 
     var flywheel = table.Flywheel<ExamplePost>();
@@ -75,16 +73,14 @@ Flywheel (aka managed batch)
     for (int x = 1; x < N; x++)
     {
         flywheel.Insert(stuff);
-        flywheel.Replace(even_more_stuff); // results placed into .Retreived
+        flywheel.Replace(even_more_stuff);
         flywheel.Delete(hording_lots_of_stuff);
-        
-        flywheel.Retrieve("partition", "row");
 
         flywheel.InsertOrReplace(stuff);
         flywheel.Merge(stuff);
         flywheel.InsertOrMerge(stuff);
 
-        // auto flushes every time a [partition]-[ischange] batch is full
+        // auto flushes every time a [partition] batch is full
     }
 
     flywheel.Flush(); // sends unfull batches. waits for results. processes outcomes
@@ -93,11 +89,11 @@ Flywheel (aka managed batch)
 Outcomes
 
 ```csharp 
+
     // Reflect on outcomes
     if(flywheel.HasErrors)
         DoSomethingWith(flywheel.Errors);
         
-    flywheel.Retreived; // List<T> of results from .Retrieve()
     flywheel.SuccessCount;    
     
 ```
