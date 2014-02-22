@@ -19,7 +19,6 @@ namespace AzureDataEaseOfUse.Tables.Async
         public TableFlywheel(CloudTable table)
         {
             this.Table = table;
-            this.Retrieved = new List<T>();
             this.Errors = new List<FlywheelError<T>>();
         }
 
@@ -28,8 +27,6 @@ namespace AzureDataEaseOfUse.Tables.Async
         Dictionary<string, List<TableBatch<T>>> Pending = new Dictionary<string, List<TableBatch<T>>>();
 
         List<FlywheelResult<T>> Executing = new List<FlywheelResult<T>>();
-
-        public readonly List<T> Retrieved;
 
         public readonly List<FlywheelError<T>> Errors;
 
@@ -77,11 +74,6 @@ namespace AzureDataEaseOfUse.Tables.Async
         public TableFlywheel<T> Delete(T item)
         {
             return Append(new FlywheelOperation<T>(item, TableOperationType.Delete));
-        }
-
-        public TableFlywheel<T> Retrieve(string partitionKey, string rowKey)
-        {
-            return Append(new FlywheelOperation<T>(partitionKey, rowKey));
         }
 
         public TableFlywheel<T> InsertOrReplace(T item)
@@ -133,16 +125,12 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         private List<TableBatch<T>> GetFlywheelPartition(FlywheelOperation<T> request)
         {
-            var key = GetFlywheelPartitionKey(request.PartitionKey, request.IsChange);
-
-            return GetFlywheelPartition(key);
+            return GetFlywheelPartition(request.PartitionKey);
         }
 
         private List<TableBatch<T>> GetFlywheelPartition(TableBatch<T> batch)
         {
-            var key = GetFlywheelPartitionKey(batch.PartitionKey, batch.IsChange);
-
-            return GetFlywheelPartition(key);
+            return GetFlywheelPartition(batch.PartitionKey);
         }
 
         private List<TableBatch<T>> GetFlywheelPartition(string key)
@@ -152,12 +140,6 @@ namespace AzureDataEaseOfUse.Tables.Async
 
             return Pending[key];
         }
-
-        private string GetFlywheelPartitionKey(string partitionKey, bool isChange)
-        {
-            return partitionKey + "-" + isChange.ToString();
-        }
-
 
         #endregion
 
@@ -219,6 +201,12 @@ namespace AzureDataEaseOfUse.Tables.Async
                 item.TableTask.Wait();
         }
 
+        private void ProcessAll()
+        {
+            Wait();
+
+        }
+
 
         private void ProcessExecuting(bool waitAll = false)
         {
@@ -230,8 +218,6 @@ namespace AzureDataEaseOfUse.Tables.Async
             foreach (var item in items)
             {
                 item.ProcessResults();
-
-                Retrieved.AddRange(item.RetrieveResults);
 
                 Errors.AddRange(item.Errors);
 

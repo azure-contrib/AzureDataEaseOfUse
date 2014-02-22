@@ -13,8 +13,6 @@ namespace AzureDataEaseOfUse.Tables.Async
         {
             this.Batch = batch;
             this.TableTask = result;
-            this.Errors = new List<FlywheelError<T>>();
-            this.RetrieveResults = new List<T>();
         }
 
 
@@ -22,8 +20,7 @@ namespace AzureDataEaseOfUse.Tables.Async
         public readonly Task<IList<TableResult>> TableTask;
 
         bool Processed = false;
-        public readonly List<FlywheelError<T>> Errors;
-        public readonly List<T> RetrieveResults;
+        public readonly List<FlywheelError<T>> Errors = new List<FlywheelError<T>>();
 
         public bool HasErrors { get; private set; }
         public int SuccessCount { get; private set; }
@@ -35,10 +32,10 @@ namespace AzureDataEaseOfUse.Tables.Async
 
             TableTask.Wait();
 
-            if (TableTask.IsCanceled || TableTask.IsFaulted)
-                FailAllOperations();
-            else
+            if (TableTask.IsSuccessful())
                 ProcessEach();
+            else
+                FailAll();
 
             Processed = true;
         }
@@ -52,28 +49,9 @@ namespace AzureDataEaseOfUse.Tables.Async
         private void Process(TableResult item)
         {
             if (item.IsSuccessful())
-                Succeed(item);
+                SuccessCount++;
             else
                 Fail(item); 
-        }
-
-        private void Succeed(TableResult item)
-        {
-            SuccessCount++;
-
-            if (Batch.IsChange)
-                return;
-            
-            RetrieveResults.Add((T)item.Result);
-        }
-
-
-        private void FailAllOperations()
-        {
-            HasErrors = true;
-            
-            foreach (var item in Batch.GetFlywheelOperations())
-                Errors.Add(new FlywheelError<T>(this, item));
         }
 
         private void Fail(TableResult item)
@@ -81,6 +59,14 @@ namespace AzureDataEaseOfUse.Tables.Async
             HasErrors = true;
 
             Errors.Add(new FlywheelError<T>(this, item));
+        }
+
+        private void FailAll()
+        {
+            HasErrors = true;
+
+            foreach (var item in Batch.GetFlywheelOperations())
+                Errors.Add(new FlywheelError<T>(this, item));
         }
 
     }

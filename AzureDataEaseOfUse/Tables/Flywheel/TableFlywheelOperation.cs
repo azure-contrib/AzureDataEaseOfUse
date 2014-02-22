@@ -18,14 +18,11 @@ namespace AzureDataEaseOfUse.Tables.Async
             this.Item = item;
             this.OperationType = operationType;
             
-            this.IsChange = operationType != TableOperationType.Retrieve;
-
             this.PartitionKey = item.PartitionKey;
             this.RowKey = item.RowKey;
 
             switch(operationType)
             {
-                case TableOperationType.Retrieve: this.Operation = TableOperation.Retrieve(item.PartitionKey, item.RowKey); break;
                 case TableOperationType.Insert: this.Operation = TableOperation.Insert(item); break;
                 case TableOperationType.Replace: this.Operation = TableOperation.Replace(item); break;
                 case TableOperationType.Delete: this.Operation = TableOperation.Delete(item); break;
@@ -38,19 +35,10 @@ namespace AzureDataEaseOfUse.Tables.Async
             }
         }
 
-        public FlywheelOperation(string partitionKey, string rowKey)
-        {
-            this.IsChange = false;
-            this.OperationType = TableOperationType.Retrieve;
-            this.Operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
-            this.PartitionKey = partitionKey;
-            this.RowKey = rowKey;
-        }
-
-
         public  T Item { get; private set; }
-        public  bool IsChange { get; private set; }
+
         public  TableOperation Operation { get; private set; }
+        
         public TableOperationType OperationType { get; private set; }
 
         public string PartitionKey { get; private set; }

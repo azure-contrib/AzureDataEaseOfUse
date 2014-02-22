@@ -22,15 +22,12 @@ namespace AzureDataEaseOfUse.Tables
         public TableBatch(FlywheelOperation<T> firstItem)
         {
             this.PartitionKey = firstItem.PartitionKey;
-            this.IsChange = firstItem.IsChange;
 
             Include(firstItem);
         }
 
         
         public readonly string PartitionKey;
-        public readonly bool IsChange;
-
 
         List<FlywheelOperation<T>> Batches = new List<FlywheelOperation<T>>();
 
@@ -77,9 +74,8 @@ namespace AzureDataEaseOfUse.Tables
         public bool CanInclude(FlywheelOperation<T> operation)
         {
             return (
-                operation.IsChange == IsChange &&
                 operation.PartitionKey == PartitionKey &&
-                Batches.Count < 100);
+                IsNotFull());
         }
 
         public bool CanNotInclude(FlywheelOperation<T> operation)

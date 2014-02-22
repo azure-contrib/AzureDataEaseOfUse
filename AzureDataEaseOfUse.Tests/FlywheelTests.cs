@@ -31,7 +31,7 @@ namespace AzureDataEaseOfUse.Tests
         #region Basic Crud
 
         [TestMethod]
-        public async Task Can_Add() 
+        public void Can_Add() 
         {
             var flywheel = Simulate.Flywheel();
 
@@ -66,43 +66,8 @@ namespace AzureDataEaseOfUse.Tests
             Assert.IsFalse(flywheel.HasErrors);
         }
 
-        [TestMethod]
-        public void Can_Retrieve() 
-        {
-            var flywheel = Simulate.Flywheel().Filled(1, 1);
-
-            flywheel.Retrieve("1", "1").Flush();
-
-            Assert.IsFalse(flywheel.HasErrors);
-            Assert.AreEqual(1, flywheel.Retrieved.Count);
-        }
-
         #endregion
 
-        [TestMethod]
-        public void Change_And_Retrieve_Actions_Are_Batched_Separately()
-        {
-            var flywheel = Simulate.Flywheel();
-
-            flywheel.Insert(Simulate.Post("1", "1"));
-            flywheel.Retrieve("1", "2");
-
-            Assert.AreEqual(2, flywheel.PendingCount());
-        }            
-
-        [TestMethod]
-        public void Can_Change_And_Retrieve_Together()
-        {
-            var flywheel = Simulate.Flywheel().Filled(1, 1);
-
-            flywheel.Retrieve("1", "1");
-            flywheel.Insert(Simulate.Post("1", "2"));
-
-            flywheel.Flush();
-
-            Assert.IsFalse(flywheel.HasErrors);
-            Assert.AreEqual(2, flywheel.SuccessCount);
-        }
 
         [TestMethod]
         public void Flushes_Batch_When_Full() 
@@ -163,7 +128,52 @@ namespace AzureDataEaseOfUse.Tests
         }
 
         [TestMethod]
-        public async Task SuccessCount_Increments() 
+        public void Can_Process_1000_Items_On_Same_Partition()
+        {
+            int total = 1000;
+
+            var flywheel = Simulate.Flywheel();
+
+            for (int x = 1; x <= total; x++)
+                flywheel.Insert(Simulate.Post(1, x));
+
+            flywheel.Flush();
+
+            Assert.AreEqual(total, flywheel.SuccessCount);
+        }
+
+        [TestMethod]
+        public void Can_Process_100_Partitions()
+        {
+            int total = 100;
+            
+            var flywheel = Simulate.Flywheel();
+
+            for (int x = 1; x <= total; x++)
+                flywheel.Insert(Simulate.Post(x, 1));
+
+            flywheel.Flush();
+
+            Assert.AreEqual(total, flywheel.SuccessCount);
+        }
+
+        [TestMethod]
+        public void Can_Handle_2k_Threshold_Overload()
+        {
+            int total = 2001;
+
+            var flywheel = Simulate.Flywheel();
+
+            for (int x = 1; x <= total; x++)
+                flywheel.Insert(Simulate.Post(x, 1));
+
+            flywheel.Flush();
+
+            Assert.AreEqual(total, flywheel.SuccessCount);
+        }
+       
+        [TestMethod]
+        public void SuccessCount_Increments() 
         {
             var flywheel = Simulate.Flywheel();
 

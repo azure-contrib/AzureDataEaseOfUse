@@ -19,6 +19,10 @@ namespace AzureDataEaseOfUse.Tables.Async
             return (409 == result.HttpStatusCode);
         }
 
+        public static bool IsSuccessful<T>(this Task<T> item)
+        {
+            return item.IsCompleted && !item.IsCanceled && !item.IsFaulted;
+        }
 
     }
 }
