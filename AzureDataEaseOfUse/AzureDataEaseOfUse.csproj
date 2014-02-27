@@ -72,9 +72,9 @@
     <Compile Include="Tables\TableBatch.cs" />
     <Compile Include="Tables\Flywheel\TableFlywheel.cs" />
     <Compile Include="Tables\Flywheel\TableFlywheelOperation.cs" />
-    <Compile Include="Tables\TableExtensions.cs" />
+    <Compile Include="Tables\Flywheel\FlywheelExtensions.cs" />
     <Compile Include="Tables\TableKeys.cs" />
-    <Compile Include="Tables\Tables.cs" />
+    <Compile Include="Tables\TableExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
