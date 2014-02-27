@@ -150,7 +150,7 @@ namespace AzureDataEaseOfUse.Tables.Async
             if (batch.IsFull())
             {
                 Flush(batch);
-                ProcessExecuting();
+                ProcessCompleted();
             }
         }
         /// <summary>
@@ -165,7 +165,7 @@ namespace AzureDataEaseOfUse.Tables.Async
 
             batches.ForEach(batch => Flush(batch));
 
-            ProcessExecuting(waitAll: true);
+            ProcessAll();
         }
 
         /// <summary>
@@ -177,6 +177,7 @@ namespace AzureDataEaseOfUse.Tables.Async
             var operation = batch.GetBatchOperation();
 
             var task = Table.ExecuteBatchAsync(operation);
+            //var task = Transmit(operation);
 
             var result = new FlywheelResult<T>(batch, task);
 
@@ -188,6 +189,19 @@ namespace AzureDataEaseOfUse.Tables.Async
             partition.Remove(batch);
         }
 
+        private Task<IList<TableResult>> Transmit(TableBatchOperation operation)
+        {
+            var tableTask = Storage.Connect().Table(Table.Name, createIfNotExists: false);
+
+            tableTask.Wait();
+
+            var table = tableTask.Result;
+
+            var task = table.ExecuteBatchAsync(operation);
+
+            return task;
+        }
+
         #endregion
 
         public bool HasErrors { get { return Errors.Count > 0; } }
@@ -196,22 +210,22 @@ namespace AzureDataEaseOfUse.Tables.Async
         /// Waits for all flushed results to finish
         /// </summary>
         public void Wait()
-        { 
-            foreach (var item in Executing)
-                item.TableTask.Wait();
+        {
+            var tasks = Executing.Select(i => i.TableTask).ToArray();
+            
+            Task.WaitAll(tasks);
         }
 
         private void ProcessAll()
         {
             Wait();
 
+            ProcessCompleted();
         }
 
 
-        private void ProcessExecuting(bool waitAll = false)
+        private void ProcessCompleted()
         {
-            if (waitAll)
-                Wait();
 
             var items = Executing.Where(q => q.TableTask.IsCompleted).ToList();
 

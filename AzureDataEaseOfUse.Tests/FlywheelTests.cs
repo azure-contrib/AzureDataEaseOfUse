@@ -38,6 +38,7 @@ namespace AzureDataEaseOfUse.Tests
             flywheel.Insert(Simulate.Post("1", "1")).Flush();
 
             Assert.IsFalse(flywheel.HasErrors);
+            Assert.AreEqual(1, flywheel.SuccessCount);
         }
 
         [TestMethod]
@@ -128,51 +129,6 @@ namespace AzureDataEaseOfUse.Tests
         }
 
         [TestMethod]
-        public void Can_Process_1000_Items_On_Same_Partition()
-        {
-            int total = 1000;
-
-            var flywheel = Simulate.Flywheel();
-
-            for (int x = 1; x <= total; x++)
-                flywheel.Insert(Simulate.Post(1, x));
-
-            flywheel.Flush();
-
-            Assert.AreEqual(total, flywheel.SuccessCount);
-        }
-
-        [TestMethod]
-        public void Can_Process_100_Partitions()
-        {
-            int total = 100;
-            
-            var flywheel = Simulate.Flywheel();
-
-            for (int x = 1; x <= total; x++)
-                flywheel.Insert(Simulate.Post(x, 1));
-
-            flywheel.Flush();
-
-            Assert.AreEqual(total, flywheel.SuccessCount);
-        }
-
-        [TestMethod]
-        public void Can_Handle_2k_Threshold_Overload()
-        {
-            int total = 2001;
-
-            var flywheel = Simulate.Flywheel();
-
-            for (int x = 1; x <= total; x++)
-                flywheel.Insert(Simulate.Post(x, 1));
-
-            flywheel.Flush();
-
-            Assert.AreEqual(total, flywheel.SuccessCount);
-        }
-       
-        [TestMethod]
         public void SuccessCount_Increments() 
         {
             var flywheel = Simulate.Flywheel();
@@ -183,5 +139,9 @@ namespace AzureDataEaseOfUse.Tests
 
             Assert.AreEqual(1, flywheel.SuccessCount);
         }
+
+        // Can process at (close to) the limit fo 2k/s
+        // Can handle "perceived" going over the limit
+
     }
 }
