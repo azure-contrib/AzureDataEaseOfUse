@@ -108,6 +108,15 @@ namespace AzureDataEaseOfUse
         
         }
 
+
+        public async static void  CleanUp()
+        {
+            var azure = Storage.Connect();
+
+            foreach (var table in azure.Tables())
+                await table.Delete(true);
+        }
+
     }
 
     public class ExamplePost : TableEntity, IAzureStorageTable
