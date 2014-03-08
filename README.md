@@ -7,6 +7,12 @@ Intention: Less code developing against storage and caching
 
 MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
+Support
+-------
+
+Questions, comments, or features give me a buzz [@rskopecek](https://twitter.com/rskopecek)
+
+Issues: [Submit an issue](https://github.com/WindowsAzure-Contrib/AzureDataEaseOfUse/issues)
 
 
 Getting Started
