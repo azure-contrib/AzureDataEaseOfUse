@@ -64,6 +64,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NextGen\Tables\AzureDataTableEntity.cs" />
+    <Compile Include="NextGen\ConnectionManager.cs" />
+    <Compile Include="NextGen\Example.cs" />
+    <Compile Include="NextGen\Tables\IAzureDataTableEntity.cs" />
+    <Compile Include="NextGen\IConnectionManager.cs" />
+    <Compile Include="NextGen\Tables\TableNameAttribute.cs" />
+    <Compile Include="NextGen\Tables\IAzureTableEntity.cs" />
+    <Compile Include="NextGen\Tables\ITableManager.cs" />
+    <Compile Include="NextGen\Tables\TableManager.cs" />
     <Compile Include="Tables\Flywheel\FlywheelError.cs" />
     <Compile Include="Tables\Flywheel\FlywheelResult.cs" />
     <Compile Include="Tables\IAzureStorageTable.cs" />
