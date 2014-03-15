@@ -24,10 +24,5 @@ namespace AzureDataEaseOfUse.Tables.Async
             return item.IsCompleted && !item.IsCanceled && !item.IsFaulted;
         }
 
-        public static TableFlywheel<T> Flywheel<T>(this CloudTable table) where T : TableEntity, IAzureStorageTable
-        {
-            return new TableFlywheel<T>(table);
-        }
-
     }
 }

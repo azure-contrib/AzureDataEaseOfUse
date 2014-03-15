@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.NextGen;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace AzureDataEaseOfUse
@@ -28,34 +28,54 @@ namespace AzureDataEaseOfUse
         }
 
 
+        #region Query & Retrieval
+
+        public Task<TableOperationResult> Retrieve(string partitionKey, string rowKey)
+        {
+            return Execute(TableOperation.Retrieve<T>(partitionKey, rowKey));
+        }
+
+        public void Where(Expression<Func<T, bool>> predicate)
+        {
+            var query = new TableQuery<T>();
+        }
+
+
+
+
+        #endregion
+
+
+
+
         #region Insert, Replace, Delete, & Merge Operations
 
-        public Task<TableResult> Insert(T item)
+        public Task<TableOperationResult> Insert(T item)
         {
             return Execute(TableOperation.Insert(item));
         }
 
-        public Task<TableResult> Replace(T item)
+        public Task<TableOperationResult> Replace(T item)
         {
             return Execute(TableOperation.Replace(item));
         }
 
-        public Task<TableResult> Delete(T item)
+        public Task<TableOperationResult> Delete(T item)
         {
             return Execute(TableOperation.Delete(item));
         }
 
-        public Task<TableResult> InsertOrReplace(T item)
+        public Task<TableOperationResult> InsertOrReplace(T item)
         {
             return Execute(TableOperation.InsertOrReplace(item));
         }
 
-        public Task<TableResult> Merge(T item)
+        public Task<TableOperationResult> Merge(T item)
         {
             return Execute(TableOperation.Merge(item));
         }
 
-        public Task<TableResult> InsertOrMerge(T item)
+        public Task<TableOperationResult> InsertOrMerge(T item)
         {
             return Execute(TableOperation.InsertOrMerge(item));
         }
@@ -64,14 +84,14 @@ namespace AzureDataEaseOfUse
 
         #region Execute Operations
 
-        public Task<TableResult> Execute(TableOperation operation)
+        public Task<TableOperationResult> Execute(TableOperation operation)
         {
             var tableName = GetTableName();
 
             return ConnectionManager.TableExecute(tableName, operation);
         }
 
-        public Task<IList<TableResult>> Execute(TableBatchOperation batch)
+        public Task<TableBatchResult> Execute(TableBatchOperation batch)
         {
             var tableName = GetTableName();
 
@@ -82,14 +102,14 @@ namespace AzureDataEaseOfUse
 
         #region Aggregators - Operations
 
-        public IList<Task<TableResult>> Execute(params TableOperation[] operations)
+        public IList<Task<TableOperationResult>> Execute(params TableOperation[] operations)
         {
             return Execute(operations.AsEnumerable());
         }
 
-        public IList<Task<TableResult>> Execute(IEnumerable<TableOperation> operations)
+        public IList<Task<TableOperationResult>> Execute(IEnumerable<TableOperation> operations)
         {
-            var results = new List<Task<TableResult>>();
+            var results = new List<Task<TableOperationResult>>();
 
             foreach (var operation in operations)
                 results.Add(Execute(operation));
@@ -101,19 +121,14 @@ namespace AzureDataEaseOfUse
 
         #region Aggregators - Batches
 
-        public IList<Task<IList<TableResult>>> Execute(params TableBatchOperation[] batches)
+        public IList<Task<TableBatchResult>> Execute(params TableBatchOperation[] batches)
         {
             return Execute(batches.AsEnumerable());
         }
 
-        public IList<Task<IList<TableResult>>> Execute(IEnumerable<TableBatchOperation> batches)
+        public IList<Task<TableBatchResult>> Execute(IEnumerable<TableBatchOperation> batches)
         {
-            var results = new List<Task<IList<TableResult>>>();
-
-            foreach (var batch in batches)
-                results.Add(Execute(batch));
-
-            return results;
+            return batches.Select(batch => Execute(batch)).ToList();
         }
 
         #endregion

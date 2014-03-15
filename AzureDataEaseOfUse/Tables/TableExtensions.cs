@@ -12,75 +12,29 @@ namespace AzureDataEaseOfUse.Tables.Async
 {
     public static class TableExtensions
     {
-
-        #region Add
-
-        public async static Task<TableResult> Add<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
-        {
-            item.SyncKeysOnRow();
-
-            //TODO: Add check to ensure partition & row key naming conforms to requirements
-
-            var operation = TableOperation.Insert(item);
-
-            var result = await table.ExecuteAsync(operation);
-
-            return result;
-        }
-
-        #endregion
-
         #region Retrieval
 
-        public async static Task<T> Get<T>(this CloudTable table, IAzureStorageTable item) where T : TableEntity, IAzureStorageTable
-        {
-            return await table.Get<T>(item.GetTableKeys());
-        }
-
-        public async static Task<T> Get<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity, IAzureStorageTable
-        {
-            var keys = new TableKeys(partitionKey, rowKey);
-
-            return await table.Get<T>(keys);
-        }
-
-        public async static Task<T> Get<T>(this CloudTable table, TableKeys keys) where T : TableEntity, IAzureStorageTable
-        {
-            var operation = TableOperation.Retrieve<T>(keys.PartitionKey, keys.RowKey);
-
-            var value = await table.ExecuteAsync(operation);
-
-            var result = (T)value.Result;
-
-            return result;
-        }
-
-        //public async static Task<List<T>> Get<T>(this CloudTable table, string partitionKey, params string[] rowKeys) where T : TableEntity, IAzureStorageTable
+        //public async static Task<T> Get<T>(this CloudTable table, IAzureStorageTable item) where T : TableEntity, IAzureStorageTable
         //{
-        //    var results = new List<T>();
+        //    return await table.Get<T>(item.GetTableKeys());
+        //}
 
-        //    var batch = new TableBatchOperation();
-            
-        //    foreach (var rowKey in rowKeys)
-        //    {
-        //        batch.Retrieve<T>(partitionKey, rowKey);
+        //public async static Task<T> Get<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity, IAzureStorageTable
+        //{
+        //    var keys = new TableKeys(partitionKey, rowKey);
 
+        //    return await table.Get<T>(keys);
+        //}
 
-        //        if (batch.IsFull())
-        //        {
-        //            var items = await table.ExecuteBatchAsync(batch);
+        //public async static Task<T> Get<T>(this CloudTable table, TableKeys keys) where T : TableEntity, IAzureStorageTable
+        //{
+        //    var operation = TableOperation.Retrieve<T>(keys.PartitionKey, keys.RowKey);
 
-        //            foreach (var item in items)
-        //            {
-        //                if (item.IsSuccessful())
-        //                    results.Add((T)item.Result);                    
-        //            }
-                    
-        //            batch = new TableBatchOperation();
-        //        }
-        //    }
+        //    var value = await table.ExecuteAsync(operation);
 
-        //    return results;
+        //    var result = (T)value.Result;
+
+        //    return result;
         //}
 
         public static bool IsFull(this TableBatchOperation batch)
@@ -105,41 +59,6 @@ namespace AzureDataEaseOfUse.Tables.Async
         public static List<T> Where<T>(this CloudTable table, Expression<Func<T, bool>> predicate) where T : TableEntity, IAzureStorageTable, new()
         {
             return table.CreateQuery<T>().Where(predicate).ToList();
-        }
-
-        #endregion
-
-        #region Update
-
-        public async static Task<TableResult> Update<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
-        {
-            item.SyncKeysOnRow();
-            
-            var operation = TableOperation.Replace(item);
-
-            var result = await table.ExecuteAsync(operation);
-
-            return result;
-        }
-
-        #endregion
-
-        #region Deletion
-
-        public async static Task<TableResult> Delete<T>(this CloudTable table, T item) where T : TableEntity, IAzureStorageTable
-        {
-            item.SyncKeysOnRow();
-
-            var operation = TableOperation.Delete(item);
-
-            var result = await table.ExecuteAsync(operation);
-
-            return result;
-        }
-
-        public async static Task<bool> Delete(this CloudTable table, bool confirm)
-        {
-            return confirm ? await table.DeleteIfExistsAsync() : false;
         }
 
         #endregion
@@ -178,9 +97,14 @@ namespace AzureDataEaseOfUse.Tables.Async
         /// <summary>
         /// Ensures the PartitionKey and Row Keys are set on item
         /// </summary>
-        public static void SyncKeysOnRow<T>(this T item) where T : TableEntity, IAzureStorageTable
+        public static void SyncKeysOnRow<T>(this T item) where T : AzureDataTableEntity<T>
         {
-            item.GetTableKeys().SyncTo(item);        
+            item.GetTableKeys().SyncTo(item);
+        }
+
+        public static TableKeys GetTableKeys(this IAzureDataTableEntity table)
+        {
+            return new TableKeys(table.GetPartitionKey(), table.GetRowKey());
         }
 
     }

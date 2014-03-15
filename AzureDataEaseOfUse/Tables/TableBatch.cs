@@ -17,7 +17,7 @@ namespace AzureDataEaseOfUse.Tables
     /// A batch with a retrieve operation cannot contain any other operations. 
     /// Note that the total payload of a batch operation is limited to 4MB.
     /// </summary>
-    public class TableBatch<T> where T : TableEntity, IAzureStorageTable
+    public class TableBatch<T> where T : AzureDataTableEntity<T>
     {
         public TableBatch(FlywheelOperation<T> firstItem)
         {

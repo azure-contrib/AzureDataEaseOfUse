@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using AzureDataEaseOfUse;
 
 namespace AzureDataEaseOfUse.Tables.Async
 {
@@ -14,52 +18,112 @@ namespace AzureDataEaseOfUse.Tables.Async
     /// Executing batches asynchronously when they fill up (100) or when Flush() is called.
     /// Order of execution is not guaranteed.
     /// </summary>
-    public class TableFlywheel<T> where T : TableEntity, IAzureStorageTable
+    public class TableFlywheel<T> : IDisposable where T : AzureDataTableEntity<T> 
     {
-        public TableFlywheel(CloudTable table)
+        public TableFlywheel(TableManager<T> tableManager)
         {
-            this.Table = table;
-            this.Errors = new List<FlywheelError<T>>();
+            this.TableManager = tableManager;
         }
 
-        public readonly CloudTable Table;
+        public readonly TableManager<T> TableManager;
 
-        Dictionary<string, List<TableBatch<T>>> Pending = new Dictionary<string, List<TableBatch<T>>>();
+        private readonly Dictionary<string, List<TableBatch<T>>> Pending = new Dictionary<string, List<TableBatch<T>>>();
 
-        List<FlywheelResult<T>> Executing = new List<FlywheelResult<T>>();
+        private readonly List<TableBatchResult> Errors = new List<TableBatchResult>();
 
-        public readonly List<FlywheelError<T>> Errors;
+        private readonly List<Task> Processing = new List<Task>(); 
 
-        public long SuccessCount { get; private set; }
 
-        /// <summary>
-        /// Count of Batches Pending Transmission
-        /// </summary>
+        #region HasErrors & Counts
+
+        public long ExecutedBatchCount { get; private set; }
+        public long ExecutedCount { get; private set; }
+
+        private long _SuccessCount = 0;
+        private long _FailureCount = 0;
+
+        public long SuccessCount
+        {
+            get { return Interlocked.Read(ref _SuccessCount); }
+        }
+
+        public long FailureCount {
+            get { return Interlocked.Read(ref _FailureCount); }
+        }
+
+        public bool HasErrors { get { return FailureCount > 0; } }
+
+        public int PendingPartitionCount()
+        {
+            return Pending.Values.Count;
+        }
+
+        public int PendingBatchCount()
+        {
+            return Pending.Sum(partition => partition.Value.Count);
+        }
+
         public int PendingCount()
         {
-            int count = 0;
-
-            foreach (var partition in Pending)
-                count += partition.Value.Count;
-
-            return count;
+            return Pending.Values.Sum(partition => partition.Sum(batch => batch.Count));
         }
 
-        /// <summary>
-        /// Count of all the executing change/retrieves (not count of batches)
-        /// </summary>
-        public int ExecutingCount()
-        { 
-            int count = 0;
-
-            foreach (var item in Executing)
-                count += item.Batch.Count;
-
-            return count;
+        public int ProcessingCount()
+        {
+            return Processing.Count;
         }
 
+        #endregion
 
-        #region CRUD Operations
+        #region Aggregators for Change Operations
+
+        // These should probably be moved to static helper
+
+        public TableFlywheel<T> Insert(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => Insert(i));
+
+            return this;
+        }
+
+        public TableFlywheel<T> Replace(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => Replace(i));
+
+            return this;
+        }
+
+        public TableFlywheel<T> Delete(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => Delete(i));
+
+            return this;
+        }
+
+        public TableFlywheel<T> InsertOrReplace(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => InsertOrReplace(i));
+
+            return this;
+        }
+
+        public TableFlywheel<T> Merge(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => Merge(i));
+
+            return this;
+        }
+
+        public TableFlywheel<T> InsertOrMerge(IEnumerable<T> items)
+        {
+            items.ToList().ForEach(i => InsertOrMerge(i));
+
+            return this;
+        }
+
+        #endregion
+
+        #region Insert, Replace, Delete, & Merge Operations
 
         public TableFlywheel<T> Insert(T item)
         {
@@ -114,14 +178,11 @@ namespace AzureDataEaseOfUse.Tables.Async
                 batch.Include(operation);
             }
 
-            FlushIfFull(batch);
+            if (batch.IsFull())
+                Flush(batch);
 
             return this;
         }
-
-        #endregion
-
-        #region Partitions
 
         private List<TableBatch<T>> GetFlywheelPartition(FlywheelOperation<T> request)
         {
@@ -145,27 +206,19 @@ namespace AzureDataEaseOfUse.Tables.Async
 
         #region Flush (aka execute)
 
-        private void FlushIfFull(TableBatch<T> batch)
-        {
-            if (batch.IsFull())
-            {
-                Flush(batch);
-                ProcessCompleted();
-            }
-        }
         /// <summary>
         /// Executes all pending batches (async) and places the outcome into the Results with the batch that kicked it off
         /// </summary>
-        public void Flush()
+        public TableFlywheel<T> Flush()
         {
             var batches = new List<TableBatch<T>>();
 
             foreach (var partition in Pending.Values)
                 batches.AddRange(partition);
 
-            batches.ForEach(batch => Flush(batch));
+            batches.ForEach(Flush);
 
-            ProcessAll();
+            return this;
         }
 
         /// <summary>
@@ -173,74 +226,92 @@ namespace AzureDataEaseOfUse.Tables.Async
         /// </summary>
         private void Flush(TableBatch<T> batch)
         {
-            // Execute
             var operation = batch.GetBatchOperation();
 
-            var task = Table.ExecuteBatchAsync(operation);
-            //var task = Transmit(operation);
+            var batchTask = TableManager.Execute(operation);
+            var processingTask = batchTask.OnCompletion(Process);
 
-            var result = new FlywheelResult<T>(batch, task);
 
-            // Move to results
-            Executing.Add(result);
+            MoveToProcessing(batch, batchTask, processingTask);
+            
+            ExecutedBatchCount++;
+            ExecutedCount += operation.Count;
 
+        }
+
+        private void MoveToProcessing(TableBatch<T> batch, Task batchTask, Task processingTask)
+        {
             var partition = GetFlywheelPartition(batch);
 
             partition.Remove(batch);
+
+            Processing.Add(batchTask);
+            Processing.Add(processingTask);
+
+            CleanUpProcessing();
         }
 
-        private Task<IList<TableResult>> Transmit(TableBatchOperation operation)
+        public void CleanUpProcessing()
         {
-            var tableTask = Storage.Connect().Table(Table.Name, createIfNotExists: false);
+            var completed = Processing.Where(q => q.IsCompleted).ToList();
 
-            tableTask.Wait();
+            foreach (var item in completed)
+            {
+                Processing.Remove(item);
+                item.Dispose();
+            }
 
-            var table = tableTask.Result;
+        }
 
-            var task = table.ExecuteBatchAsync(operation);
+        /// <summary>
+        /// Waits for all executing and processing tasks to complete
+        /// </summary>
+        public void Wait()
+        {
+            var task = WhenAll();
 
-            return task;
+            task.Wait();
+
+            CleanUpProcessing();
+        }
+
+        /// <summary>
+        /// Returns task to detect when all executing and processing tasks are complete
+        /// </summary>
+        public Task WhenAll()
+        {
+            return Task.WhenAll(Processing);
+        }
+
+        public void FlushAndWait()
+        {
+            Flush();
+            Wait();
         }
 
         #endregion
 
-        public bool HasErrors { get { return Errors.Count > 0; } }
-
-        /// <summary>
-        /// Waits for all flushed results to finish
-        /// </summary>
-        public void Wait()
+        private void Process(Task<TableBatchResult> task)
         {
-            var tasks = Executing.Select(i => i.TableTask).ToArray();
-            
-            Task.WaitAll(tasks);
-        }
+            // Note: IConnectionManager guarantees that task will return successful with batch result.
+            //          It will encapsulate underlying task errors.
 
-        private void ProcessAll()
-        {
-            Wait();
+            var item = task.Result;
 
-            ProcessCompleted();
-        }
-
-
-        private void ProcessCompleted()
-        {
-
-            var items = Executing.Where(q => q.TableTask.IsCompleted).ToList();
-
-            foreach (var item in items)
+            if (item.HasErrors)
             {
-                item.ProcessResults();
+                Errors.Add(item);
 
-                Errors.AddRange(item.Errors);
-
-                SuccessCount += item.SuccessCount;
-
-                Executing.Remove(item);
+                Interlocked.Add(ref _FailureCount, item.Errors.Count);
             }
+
+            Interlocked.Add(ref _SuccessCount, item.Successful.Count);
         }
 
 
+        public void Dispose()
+        {
+            CleanUpProcessing();
+        }
     }
 }

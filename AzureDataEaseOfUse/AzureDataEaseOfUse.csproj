@@ -64,17 +64,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NextGen\Tables\AzureDataTableEntity.cs" />
-    <Compile Include="NextGen\ConnectionManager.cs" />
-    <Compile Include="NextGen\Example.cs" />
-    <Compile Include="NextGen\Tables\IAzureDataTableEntity.cs" />
-    <Compile Include="NextGen\IConnectionManager.cs" />
-    <Compile Include="NextGen\Tables\TableNameAttribute.cs" />
-    <Compile Include="NextGen\Tables\IAzureTableEntity.cs" />
-    <Compile Include="NextGen\Tables\ITableManager.cs" />
-    <Compile Include="NextGen\Tables\TableManager.cs" />
-    <Compile Include="Tables\Flywheel\FlywheelError.cs" />
-    <Compile Include="Tables\Flywheel\FlywheelResult.cs" />
+    <Compile Include="Tables\AzureDataTableEntity.cs" />
+    <Compile Include="Tables\Attributes\BatchSizeAttribute.cs" />
+    <Compile Include="Tables\IAzureDataTableEntity.cs" />
+    <Compile Include="IConnectionManager.cs" />
+    <Compile Include="Tables\Results\TableBatchResult.cs" />
+    <Compile Include="Tables\Attributes\TableNameAttribute.cs" />
+    <Compile Include="Tables\ITableManager.cs" />
+    <Compile Include="Tables\Results\TableQueryResult.cs" />
+    <Compile Include="Tables\Results\TableRetrieveResult.cs" />
+    <Compile Include="Tables\TableManager.cs" />
     <Compile Include="Tables\IAzureStorageTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage.cs" />
@@ -84,6 +83,9 @@
     <Compile Include="Tables\Flywheel\FlywheelExtensions.cs" />
     <Compile Include="Tables\TableKeys.cs" />
     <Compile Include="Tables\TableExtensions.cs" />
+    <Compile Include="Tables\Results\TableOperationResult.cs" />
+    <Compile Include="TaskExtensions.cs" />
+    <Compile Include="TaskManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

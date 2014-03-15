@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Text;
-using System.Threading.Tasks;
+using AzureDataEaseOfUse.Tests;
 using Microsoft.WindowsAzure.Storage.Table;
 using Xunit;
 using Moq;
@@ -14,9 +14,14 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
 {
     public class The_TableManager
     {
+
+        #region Setup
+
         public The_TableManager()
         {
-            Table = Simulate.TableManager<Example>();
+            Tardis = new TimeMachine();
+            ConnectionManager = Simulate.SuccessfulConnectionManager(Tardis);
+            Table = Simulate.TableManager<Example>(ConnectionManager, Tardis);
             NewData = new Example();
             ExistingData = new Example() {ETag = "abc"};
 
@@ -29,18 +34,26 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
             BatchOperations = new List<TableBatchOperation> {new TableBatchOperation(), new TableBatchOperation()};
         }
 
+        private readonly Mock<IConnectionManager> ConnectionManager;
+        private readonly TimeMachine Tardis;
         private readonly TableManager<Example> Table;
         private readonly Example NewData;
         private readonly Example ExistingData;
-        private List<TableOperation> Operations;
-        private List<TableBatchOperation> BatchOperations;
-            
-            [Fact]
-        public void Can_Create_Table_Connection()
+        private readonly List<TableOperation> Operations;
+        private readonly List<TableBatchOperation> BatchOperations;
+
+        #endregion
+
+        [Fact]
+        public void Can_Create_TableManager()
         {
             var connectionManager = new Mock<IConnectionManager>();
             var table = new TableManager<Example>(connectionManager.Object);
+
+            Assert.NotNull(table);
         }
+
+        #region Table Name Identification
 
         [Fact]
         public void Can_Get_Table_Name_Property_From_Type()
@@ -53,12 +66,14 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
         [Fact]
         public void Can_Get_Table_Name_Property_From_Attribute_Override()
         {
-            var table = Simulate.TableManager<ExampleWithNameOverride>();
+            var table = Simulate.TableManager<ExampleWithNameOverride>(ConnectionManager, Tardis);
 
             var result = table.GetTableName();
 
             Assert.Equal("A-Table", result);
         }
+
+        #endregion
 
         #region Execution Operations
 
@@ -200,44 +215,6 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
 
         #endregion
 
-
     }
-
-
-    public static class Simulate
-    {
-        public static TableManager<T> TableManager<T>() where T : AzureDataTableEntity<T>
-        {
-            var connectionManager = ConnectionManager();
-            var table = new TableManager<T>(connectionManager.Object);
-
-            return table;
-        }
-
-
-        public static Mock<IConnectionManager> ConnectionManager()
-        {
-            var cm = new Mock<IConnectionManager>();
-
-            var taskResult = new Task<TableResult>(() => new TableResult(){ HttpStatusCode = 200 });
-
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>())).Returns(taskResult);
-
-            return cm;
-        }
-
-    }
-
-
-    public class Example : AzureDataTableEntity<Example>
-    {
-        public string Title { get; set; }
-    }
-
-    [TableName("A-Table")]
-    public class ExampleWithNameOverride : AzureDataTableEntity<ExampleWithNameOverride>
-    {
-        public string Title { get; set; }
-    }
-
+    
 }

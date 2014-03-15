@@ -9,7 +9,7 @@ using AzureDataEaseOfUse.Tables.Async;
 namespace AzureDataEaseOfUse.Tables.Async
 {
 
-    public class FlywheelOperation<T> where T: TableEntity, IAzureStorageTable
+    public class FlywheelOperation<T> where T : AzureDataTableEntity<T>
     {
         public FlywheelOperation(T item, TableOperationType operationType)
         {

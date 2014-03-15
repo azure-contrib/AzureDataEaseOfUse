@@ -19,7 +19,7 @@ namespace AzureDataEaseOfUse
         public readonly string PartitionKey;
         public readonly string RowKey;
 
-        public void SyncTo<T>(T item) where T : TableEntity, IAzureStorageTable
+        public void SyncTo<T>(T item) where T : AzureDataTableEntity<T>
         {
             item.PartitionKey = PartitionKey;
             item.RowKey = RowKey;
