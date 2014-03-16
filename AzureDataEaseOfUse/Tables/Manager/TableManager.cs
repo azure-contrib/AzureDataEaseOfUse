@@ -13,16 +13,32 @@ namespace AzureDataEaseOfUse.Tables
     {
         public TableManager(IConnectionManager connectionManager)
         {
-            ConnectionManager = connectionManager;
+            _ConnectionManager = connectionManager;
+            _TableName = TableExtensions.GetTableName(typeof(T));
+            _Flywheel = new TableFlywheel<T>(this);
         }
 
-        public IConnectionManager ConnectionManager { get; private set; }
+        #region ConnectionManager, TableName, Flywheel (Properties & Vars)
 
-        private readonly string _TableName = TableExtensions.GetTableName(typeof (T));
+        private readonly IConnectionManager _ConnectionManager;
+        private readonly string _TableName;
+        private readonly TableFlywheel<T> _Flywheel;
+
+        public IConnectionManager ConnectionManager
+        {
+            get { return _ConnectionManager; }
+        }
 
         public string TableName {
             get { return _TableName; }
         }
+
+        public TableFlywheel<T> Flywheel
+        {
+            get { return _Flywheel; }
+        }
+
+        #endregion
 
         #region Retrieval
 

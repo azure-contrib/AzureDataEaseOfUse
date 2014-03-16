@@ -207,7 +207,7 @@ namespace AzureDataEaseOfUse.Tables
         #region Flush (aka execute)
 
         /// <summary>
-        /// Executes all pending batches (async) and places the outcome into the Results with the batch that kicked it off
+        /// Executes all pending batches Async and schedules task continuations for processing results.  Executed Counts are incremented immediately.
         /// </summary>
         public TableFlywheel<T> Flush()
         {
@@ -222,7 +222,7 @@ namespace AzureDataEaseOfUse.Tables
         }
 
         /// <summary>
-        /// Executes the batch (async) and places the outcome into the Results with the batch that kicked it off
+        /// Executes the batch Async and schedules task continuation for processing results.  Executed Counts are incremented immediately.
         /// </summary>
         private void Flush(TableBatch<T> batch)
         {
@@ -251,7 +251,7 @@ namespace AzureDataEaseOfUse.Tables
             CleanUpProcessing();
         }
 
-        public void CleanUpProcessing()
+        private void CleanUpProcessing()
         {
             var completed = Processing.Where(q => q.IsCompleted).ToList();
 
@@ -260,7 +260,6 @@ namespace AzureDataEaseOfUse.Tables
                 Processing.Remove(item);
                 item.Dispose();
             }
-
         }
 
         /// <summary>

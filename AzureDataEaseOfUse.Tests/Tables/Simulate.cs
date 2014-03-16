@@ -10,20 +10,12 @@ namespace AzureDataEaseOfUse.Tests.Tables
 {
     public static class Simulate
     {
-        public static TableManager<T> TableManager<T>(Mock<IConnectionManager> connectionManager, TimeMachine timeMachine) where T : AzureDataTableEntity<T>
-        {
-            var table = new TableManager<T>(connectionManager.Object);
+        //public static TableManager<T> TableManager<T>(Mock<IConnectionManager> connectionManager, TimeMachine timeMachine) where T : AzureDataTableEntity<T>
+        //{
+        //    var table = new TableManager<T>(connectionManager.Object);
 
-            return table;
-        }
-
-        public static TableFlywheel<T> TableFlywheel<T>(Mock<IConnectionManager> connectionManager, TimeMachine timeMachine) where T : AzureDataTableEntity<T>
-        {
-            var tableManager = TableManager<T>(connectionManager, timeMachine);
-            var flywheel = new TableFlywheel<T>(tableManager);
-
-            return flywheel;
-        }
+        //    return table;
+        //}
 
         public static List<Example> NewDataSet(int count)
         {

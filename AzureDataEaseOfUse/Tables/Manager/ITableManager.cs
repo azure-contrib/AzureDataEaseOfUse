@@ -12,8 +12,9 @@ namespace AzureDataEaseOfUse.Tables
     {
         string TableName { get; }
 
-        IConnectionManager ConnectionManager { get; }
+        TableFlywheel<T> Flywheel { get; }
 
+        IConnectionManager ConnectionManager { get; }
 
         Task<TableOperationResult<T>> Execute(TableOperation operation);
 

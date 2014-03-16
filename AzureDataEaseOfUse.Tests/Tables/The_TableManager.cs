@@ -20,7 +20,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         {
             Tardis = new TimeMachine();
             ConnectionManager = Simulate.SuccessfulConnectionManager<Example>(Tardis);
-            Table = Simulate.TableManager<Example>(ConnectionManager, Tardis);
+            Table = new TableManager<Example>(ConnectionManager.Object);
             NewData = new Example();
             ExistingData = new Example() {ETag = "abc"};
 
@@ -65,7 +65,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         [Fact]
         public void Can_Get_Table_Name_Property_From_Attribute_Override()
         {
-            var table = Simulate.TableManager<ExampleWithNameOverride>(ConnectionManager, Tardis);
+            var table = new TableManager<ExampleWithNameOverride>(ConnectionManager.Object);
 
             var result = table.TableName;
 

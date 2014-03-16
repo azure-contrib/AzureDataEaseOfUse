@@ -19,7 +19,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
 
             Tardis = new TimeMachine();
             ConnectionManager = Simulate.FastReturnConnectionManager<Example>(Tardis);
-            Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
+            Flywheel = new TableManager<Example>(ConnectionManager.Object).Flywheel;
             NewData = new Example() {PartitionKey = "a", RowKey = "b"};
             NewDataDifferentPartition = new Example() {PartitionKey = "b", RowKey = "a"};
             ExistingData = new Example() {PartitionKey = "a", RowKey = "c", ETag = "abc"};

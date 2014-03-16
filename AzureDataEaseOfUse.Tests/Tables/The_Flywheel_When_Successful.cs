@@ -22,7 +22,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
             
             Tardis = new TimeMachine();
             ConnectionManager = Simulate.SuccessfulConnectionManager<Example>(Tardis);
-            Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
+            Flywheel = new TableManager<Example>(ConnectionManager.Object).Flywheel;
             NewData = new Example(){PartitionKey = "a", RowKey = "b"};
             NewDataDifferentPartition = new Example() { PartitionKey = "b", RowKey = "a" };
             ExistingData = new Example() { PartitionKey = "a", RowKey = "c", ETag = "abc" };
@@ -40,7 +40,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         [Fact]
         public void Can_Create_Flywheel()
         {
-            var tableManager = Simulate.TableManager<Example>(ConnectionManager, Tardis);
+            var tableManager = new TableManager<Example>(ConnectionManager.Object);
             var flywheel = new TableFlywheel<Example>(tableManager);
 
             Assert.NotNull(flywheel);

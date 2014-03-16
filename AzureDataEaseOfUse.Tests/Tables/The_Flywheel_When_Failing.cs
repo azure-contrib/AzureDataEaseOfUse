@@ -36,7 +36,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         public void Reports_Errors()
         {
             ConnectionManager = Simulate.FailingConnectionManager<Example>(Tardis);
-            Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
+            Flywheel = new TableManager<Example>(ConnectionManager.Object).Flywheel;
 
             Tardis.ExecuteInContext(advancer =>
             {
@@ -55,7 +55,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         public void Reports_Errors_And_Successes_From_Same_Batch()
         {
             ConnectionManager = Simulate.EvenSuccessOddFailingConnectionManager(Tardis);
-            Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
+            Flywheel = new TableManager<Example>(ConnectionManager.Object).Flywheel;
 
             Tardis.ExecuteInContext(advancer =>
             {
