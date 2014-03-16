@@ -10,8 +10,7 @@ namespace AzureDataEaseOfUse.Tables
 {
     public interface ITableManager<T> where T : AzureDataTableEntity<T> //IAzureDataTableEntity
     {
-
-        string GetTableName();
+        string TableName { get; }
 
         IConnectionManager ConnectionManager { get; }
 

@@ -57,7 +57,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         [Fact]
         public void Can_Get_Table_Name_Property_From_Type()
         {
-            var result = Table.GetTableName();
+            var result = Table.TableName;
 
             Assert.Equal("Example", result);
         }
@@ -67,7 +67,7 @@ namespace AzureDataEaseOfUse.Tests.Tables
         {
             var table = Simulate.TableManager<ExampleWithNameOverride>(ConnectionManager, Tardis);
 
-            var result = table.GetTableName();
+            var result = table.TableName;
 
             Assert.Equal("A-Table", result);
         }

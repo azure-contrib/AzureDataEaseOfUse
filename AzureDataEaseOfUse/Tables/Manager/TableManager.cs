@@ -14,20 +14,14 @@ namespace AzureDataEaseOfUse.Tables
         public TableManager(IConnectionManager connectionManager)
         {
             ConnectionManager = connectionManager;
-            TableName = GetTableName();
         }
 
         public IConnectionManager ConnectionManager { get; private set; }
 
-        public readonly string TableName;
+        private readonly string _TableName = TableExtensions.GetTableName(typeof (T));
 
-        public string GetTableName()
-        {
-            var info = typeof (T);
-            
-            var att = info.GetCustomAttribute<TableNameAttribute>();
-
-            return att == null ? info.Name : att.TableName;
+        public string TableName {
+            get { return _TableName; }
         }
 
         #region Retrieval

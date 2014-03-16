@@ -26,7 +26,6 @@ namespace AzureDataEaseOfUse.Tables
                 item.RowKey = rowKey;
         }
 
-
         /// <summary>
         /// Returns the TypeName or name override configured via [TableName("OtherName")]
         /// </summary>
@@ -34,6 +33,14 @@ namespace AzureDataEaseOfUse.Tables
         {
             var info = typeof(T);
 
+            return GetTableName(info);
+        }
+
+        /// <summary>
+        /// Returns the TypeName or name override configured via [TableName("OtherName")]
+        /// </summary>
+        public static string GetTableName(Type info)
+        {
             var att = info.GetCustomAttribute<TableNameAttribute>();
 
             return att == null ? info.Name : att.TableName;
