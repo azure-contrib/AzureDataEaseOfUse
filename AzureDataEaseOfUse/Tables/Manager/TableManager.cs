@@ -9,7 +9,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace AzureDataEaseOfUse.Tables
 {
-    public class TableManager<T> : ITableManager<T> where T : AzureDataTableEntity<T>
+    public class TableManager<T> : ITableManager<T> where T : AzureDataTableEntity<T>, new()
     {
         public TableManager(IConnectionManager connectionManager)
         {

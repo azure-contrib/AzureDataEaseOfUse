@@ -16,7 +16,7 @@ namespace AzureDataEaseOfUse
     public interface IConnectionManager
     {
 
-        Task CreateTablesIfNotExist(params string[] tableNames);
+        List<Task> CreateTablesIfNotExist(params string[] tableNames);
 
         Task<TableOperationResult<T>> TableExecute<T>(string tableName, TableOperation operation)
             where T : AzureDataTableEntity<T>;
@@ -25,13 +25,13 @@ namespace AzureDataEaseOfUse
 
 
         Task<TableQueryResult<T>> TableQuery<T>(string tableName, Expression<Func<T, bool>> predicate)
-            where T : AzureDataTableEntity<T>;
+            where T : AzureDataTableEntity<T>, new();
         //Example: return table.CreateQuery<T>().Where(predicate).ToList();
 
         /// <summary>
         /// Gets a list of table names found in the account
         /// </summary>
-        Task<List<string>> TableNames();
+        Task<List<string>> TableNames(string prefix = null);
 
     }
 

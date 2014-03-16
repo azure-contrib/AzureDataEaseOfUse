@@ -24,7 +24,5 @@ namespace AzureDataEaseOfUse
             return task.ContinueWith(continuationAction, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-
-
     }
 }

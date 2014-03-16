@@ -18,7 +18,7 @@ namespace AzureDataEaseOfUse.Tables
     /// Executing batches asynchronously when they fill up (100) or when Flush() is called.
     /// Order of execution is not guaranteed.
     /// </summary>
-    public class TableFlywheel<T> : IDisposable where T : AzureDataTableEntity<T> 
+    public class TableFlywheel<T> : IDisposable where T : AzureDataTableEntity<T>, new()
     {
         public TableFlywheel(TableManager<T> tableManager)
         {

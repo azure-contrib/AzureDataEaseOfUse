@@ -64,6 +64,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connections\ConnectionExtensions.cs" />
+    <Compile Include="Connections\SingleAccountConnectionManager.cs" />
     <Compile Include="Tables\Entities\AzureDataTableEntity.cs" />
     <Compile Include="Tables\Attributes\BatchSizeAttribute.cs" />
     <Compile Include="Tables\Entities\IAzureDataTableEntity.cs" />

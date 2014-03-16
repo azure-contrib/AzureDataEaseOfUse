@@ -8,7 +8,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace AzureDataEaseOfUse.Tables
 {
-    public interface ITableManager<T> where T : AzureDataTableEntity<T> //IAzureDataTableEntity
+    public interface ITableManager<T> where T : AzureDataTableEntity<T>, new()
     {
         string TableName { get; }
 
