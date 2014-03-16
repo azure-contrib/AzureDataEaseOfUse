@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
-using AzureDataEaseOfUse.Tables.Async;
 
-namespace AzureDataEaseOfUse.Tables.Async
+namespace AzureDataEaseOfUse.Tables
 {
 
     public class FlywheelOperation<T> where T : AzureDataTableEntity<T>
     {
         public FlywheelOperation(T item, TableOperationType operationType)
         {
-            item.SyncKeysOnRow();
+            item.SetPartitionAndRowKeys();
 
             this.Item = item;
             this.OperationType = operationType;

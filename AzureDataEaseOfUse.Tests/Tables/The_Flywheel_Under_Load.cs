@@ -5,10 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Moq;
-using AzureDataEaseOfUse.Tables.Async;
-using AzureDataEaseOfUse.NextGen7.Tests;
+using AzureDataEaseOfUse.Tables;
 
-namespace AzureDataEaseOfUse.Tests
+namespace AzureDataEaseOfUse.Tests.Tables
 {
     public class The_Flywheel_Under_Load
     {
@@ -19,7 +18,7 @@ namespace AzureDataEaseOfUse.Tests
         {
 
             Tardis = new TimeMachine();
-            ConnectionManager = Simulate.FastReturnConnectionManager(Tardis);
+            ConnectionManager = Simulate.FastReturnConnectionManager<Example>(Tardis);
             Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
             NewData = new Example() {PartitionKey = "a", RowKey = "b"};
             NewDataDifferentPartition = new Example() {PartitionKey = "b", RowKey = "a"};

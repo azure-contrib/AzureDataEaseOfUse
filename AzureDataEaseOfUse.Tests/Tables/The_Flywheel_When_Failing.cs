@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.NextGen7.Tests;
-using AzureDataEaseOfUse.Tables.Async;
+using AzureDataEaseOfUse.Tables;
 using Xunit;
 using Moq;
 
-namespace AzureDataEaseOfUse.Tests
+namespace AzureDataEaseOfUse.Tests.Tables
 {
     public class The_Flywheel_When_Failing
     {
@@ -36,7 +35,7 @@ namespace AzureDataEaseOfUse.Tests
         [Fact]
         public void Reports_Errors()
         {
-            ConnectionManager = Simulate.FailingConnectionManager(Tardis);
+            ConnectionManager = Simulate.FailingConnectionManager<Example>(Tardis);
             Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
 
             Tardis.ExecuteInContext(advancer =>

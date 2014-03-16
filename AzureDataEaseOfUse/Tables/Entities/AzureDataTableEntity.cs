@@ -1,6 +1,6 @@
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
     public class AzureDataTableEntity<T> : TableEntity, IAzureDataTableEntity where T : AzureDataTableEntity<T>
     {

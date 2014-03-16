@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace AzureDataEaseOfUse.Tables.Async
+namespace AzureDataEaseOfUse.Tables
 {
     public static class FlywheelExtensions
     {

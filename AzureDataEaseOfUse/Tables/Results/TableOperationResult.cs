@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.Tables.Async;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
-    public class TableOperationResult
+    public class TableOperationResult<T> where T : AzureDataTableEntity<T>
     {
         public TableOperationResult(TableOperation operation, TableResult result)
         {
@@ -19,11 +18,16 @@ namespace AzureDataEaseOfUse
         public readonly TableOperation Operation;
         public readonly TableResult Result;
 
-        public T Value<T>()
-        {
-            return Result.IsSuccessful() ? (T) Result.Result : default(T);
-        }
 
+        public bool HasValue { get { return Value != null; } }
+
+        /// <summary>
+        /// If successful, returns object from retrieve operation.  Otherwise default(T).
+        /// </summary>
+        public T Value
+        {
+            get { return Result.IsSuccessful() ? (T)Result.Result : default(T); }
+        }
 
     }
 }

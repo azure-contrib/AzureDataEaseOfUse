@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.NextGen7.Tests;
-using AzureDataEaseOfUse.Tables.Async;
+using AzureDataEaseOfUse.Tables;
 using Microsoft.WindowsAzure.Storage.Table;
 using Xunit;
 using Moq;
 
-namespace AzureDataEaseOfUse.Tests
+namespace AzureDataEaseOfUse.Tests.Tables
 {
     public class The_Flywheel_When_Successful
     {
@@ -22,7 +21,7 @@ namespace AzureDataEaseOfUse.Tests
         {
             
             Tardis = new TimeMachine();
-            ConnectionManager = Simulate.SuccessfulConnectionManager(Tardis);
+            ConnectionManager = Simulate.SuccessfulConnectionManager<Example>(Tardis);
             Flywheel = Simulate.TableFlywheel<Example>(ConnectionManager, Tardis);
             NewData = new Example(){PartitionKey = "a", RowKey = "b"};
             NewDataDifferentPartition = new Example() { PartitionKey = "b", RowKey = "a" };

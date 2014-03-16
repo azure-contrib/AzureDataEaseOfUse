@@ -14,11 +14,16 @@ namespace AzureDataEaseOfUse
             return task.ContinueWith(continuationAction, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
 
-
-        public static Task OnCanceled<TResult>(this Task<TResult> task, Action<Task<TResult>> continuationAction)
+        public static Task OnCancelled<TResult>(this Task<TResult> task, Action<Task<TResult>> continuationAction)
         {
             return task.ContinueWith(continuationAction, TaskContinuationOptions.OnlyOnCanceled);
         }
+
+        public static Task OnFaulted<TResult>(this Task<TResult> task, Action<Task<TResult>> continuationAction)
+        {
+            return task.ContinueWith(continuationAction, TaskContinuationOptions.OnlyOnFaulted);
+        }
+
 
 
     }

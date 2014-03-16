@@ -10,7 +10,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using AzureDataEaseOfUse;
 
-namespace AzureDataEaseOfUse.Tables.Async
+namespace AzureDataEaseOfUse.Tables
 {
     /// <summary>
     /// Used to process a flow of table batches.

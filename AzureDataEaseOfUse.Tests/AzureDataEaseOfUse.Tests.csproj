@@ -83,15 +83,15 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="ManuallyPumpedSynchronizationContext.cs" />
+    <Compile Include="TimeMachine\ManuallyPumpedSynchronizationContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Simulate.cs" />
+    <Compile Include="Tables\Simulate.cs" />
     <Compile Include="Tables\Integration_Tests.cs" />
     <Compile Include="Tables\The_Flywheel_Under_Load.cs" />
     <Compile Include="Tables\The_Flywheel_When_Failing.cs" />
     <Compile Include="Tables\The_Flywheel_When_Successful.cs" />
     <Compile Include="Tables\The_TableManager.cs" />
-    <Compile Include="TimeMachine.cs" />
+    <Compile Include="TimeMachine\TimeMachine.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureDataEaseOfUse\AzureDataEaseOfUse.csproj">

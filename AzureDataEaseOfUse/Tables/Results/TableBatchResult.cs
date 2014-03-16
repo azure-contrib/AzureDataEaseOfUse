@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.Tables.Async;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
     public class TableBatchResult
     {

@@ -4,13 +4,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Text;
-using AzureDataEaseOfUse.Tests;
 using Microsoft.WindowsAzure.Storage.Table;
 using Xunit;
 using Moq;
-using AzureDataEaseOfUse;
+using AzureDataEaseOfUse.Tables;
 
-namespace AzureDataEaseOfUse.NextGen7.Tests
+namespace AzureDataEaseOfUse.Tests.Tables
 {
     public class The_TableManager
     {
@@ -20,7 +19,7 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
         public The_TableManager()
         {
             Tardis = new TimeMachine();
-            ConnectionManager = Simulate.SuccessfulConnectionManager(Tardis);
+            ConnectionManager = Simulate.SuccessfulConnectionManager<Example>(Tardis);
             Table = Simulate.TableManager<Example>(ConnectionManager, Tardis);
             NewData = new Example();
             ExistingData = new Example() {ETag = "abc"};

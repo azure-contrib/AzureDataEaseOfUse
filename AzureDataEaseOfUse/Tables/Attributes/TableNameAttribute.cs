@@ -1,6 +1,6 @@
 using System;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class TableNameAttribute : Attribute

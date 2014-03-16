@@ -4,8 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.Tables.Results;
 using Microsoft.WindowsAzure.Storage.Table;
+using AzureDataEaseOfUse.Tables;
 
 namespace AzureDataEaseOfUse
 {
@@ -16,19 +16,22 @@ namespace AzureDataEaseOfUse
     public interface IConnectionManager
     {
 
+        Task CreateTablesIfNotExist(params string[] tableNames);
 
-        Task<TableOperationResult> TableExecute(string tableName, TableOperation operation);
+        Task<TableOperationResult<T>> TableExecute<T>(string tableName, TableOperation operation)
+            where T : AzureDataTableEntity<T>;
 
         Task<TableBatchResult> TableExecute(string tableName, TableBatchOperation batch);
 
-        Task<TableRetrieveResult<T>> TableRetrieve<T>(string table, TableOperation operation)
-            where T : AzureDataTableEntity<T>; 
 
         Task<TableQueryResult<T>> TableQuery<T>(string tableName, Expression<Func<T, bool>> predicate)
             where T : AzureDataTableEntity<T>;
         //Example: return table.CreateQuery<T>().Where(predicate).ToList();
 
-
+        /// <summary>
+        /// Gets a list of table names found in the account
+        /// </summary>
+        Task<List<string>> TableNames();
 
     }
 

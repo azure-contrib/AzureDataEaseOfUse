@@ -6,21 +6,22 @@ using System.Threading.Tasks;
 using AzureDataEaseOfUse.Tables;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace AzureDataEaseOfUse
+namespace AzureDataEaseOfUse.Tables
 {
-    public interface ITableManager<T> where T : IAzureDataTableEntity
+    public interface ITableManager<T> where T : AzureDataTableEntity<T> //IAzureDataTableEntity
     {
 
         string GetTableName();
-        
+
         IConnectionManager ConnectionManager { get; }
 
 
-        Task<TableOperationResult> Execute(TableOperation operation);
+        Task<TableOperationResult<T>> Execute(TableOperation operation);
 
-        IList<Task<TableOperationResult>> Execute(params TableOperation[] operations);
+        IList<Task<TableOperationResult<T>>> Execute(params TableOperation[] operations);
 
-        IList<Task<TableOperationResult>> Execute(IEnumerable<TableOperation> operations);
+        IList<Task<TableOperationResult<T>>> Execute(IEnumerable<TableOperation> operations);
+            
 
 
         Task<TableBatchResult> Execute(TableBatchOperation batch);

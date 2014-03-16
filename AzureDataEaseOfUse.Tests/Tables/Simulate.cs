@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AzureDataEaseOfUse.Tables.Async;
+using AzureDataEaseOfUse.Tables;
 using AzureDataEaseOfUse.Tests;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 
-namespace AzureDataEaseOfUse.NextGen7.Tests
+namespace AzureDataEaseOfUse.Tests.Tables
 {
     public static class Simulate
     {
@@ -47,12 +47,12 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
         }
 
 
-        public static Mock<IConnectionManager> SuccessfulConnectionManager(TimeMachine timeMachine)
+        public static Mock<IConnectionManager> SuccessfulConnectionManager<T>(TimeMachine timeMachine) where T : AzureDataTableEntity<T>
         {
             var cm = new Mock<IConnectionManager>();
 
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>()))
-                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleSuccess(SuccessfulTableResult(operation)));
+            cm.Setup(i => i.TableExecute<T>(It.IsAny<string>(), It.IsAny<TableOperation>()))
+                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleSuccess(SuccessfulTableResult<T>(operation)));
 
             cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableBatchOperation>()))
                 .Returns((string tableName, TableBatchOperation batch) => timeMachine.ScheduleSuccess(SuccessfulTableResult(batch)));
@@ -60,12 +60,12 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
             return cm;
         }
 
-        public static Mock<IConnectionManager> FastReturnConnectionManager(TimeMachine timeMachine)
+        public static Mock<IConnectionManager> FastReturnConnectionManager<T>(TimeMachine timeMachine) where T : AzureDataTableEntity<T>
         {
             var cm = new Mock<IConnectionManager>();
 
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>()))
-                .Returns((string tableName, TableOperation operation) => FastReturnTask(SuccessfulTableResult(operation)));
+            cm.Setup(i => i.TableExecute<T>(It.IsAny<string>(), It.IsAny<TableOperation>()))
+                .Returns((string tableName, TableOperation operation) => FastReturnTask(SuccessfulTableResult<T>(operation)));
 
             cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableBatchOperation>()))
                 .Returns((string tableName, TableBatchOperation batch) => FastReturnTask(SuccessfulTableResult(batch)));
@@ -74,12 +74,12 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
         }
 
 
-        public static Mock<IConnectionManager> FailingConnectionManager(TimeMachine timeMachine)
+        public static Mock<IConnectionManager> FailingConnectionManager<T>(TimeMachine timeMachine) where T : AzureDataTableEntity<T>
         {
             var cm = new Mock<IConnectionManager>();
 
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>()))
-                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleSuccess(FailingTableResult(operation)));
+            cm.Setup(i => i.TableExecute<T>(It.IsAny<string>(), It.IsAny<TableOperation>()))
+                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleSuccess(FailingTableResult<T>(operation)));
 
             cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableBatchOperation>()))
                 .Returns((string tableName, TableBatchOperation batch) => timeMachine.ScheduleSuccess(FailingTableResult(batch)));
@@ -97,12 +97,12 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
             return cm;
         }
 
-        public static Mock<IConnectionManager> CancellingTaskConnectionManager(TimeMachine timeMachine)
+        public static Mock<IConnectionManager> CancellingTaskConnectionManager<T>(TimeMachine timeMachine) where T : AzureDataTableEntity<T>
         {
             var cm = new Mock<IConnectionManager>();
 
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>()))
-                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleCancellation<TableOperationResult>());
+            cm.Setup(i => i.TableExecute<T>(It.IsAny<string>(), It.IsAny<TableOperation>()))
+                .Returns((string tableName, TableOperation operation) => timeMachine.ScheduleCancellation<TableOperationResult<T>>());
 
             cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableBatchOperation>()))
                 .Returns((string tableName, TableBatchOperation batch) => timeMachine.ScheduleCancellation<TableBatchResult>());
@@ -110,12 +110,12 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
             return cm;
         }
 
-        public static Mock<IConnectionManager> FaultingTaskConnectionManager(TimeMachine timeMachine)
+        public static Mock<IConnectionManager> FaultingTaskConnectionManager<T>(TimeMachine timeMachine) where T : AzureDataTableEntity<T>
         {
             var cm = new Mock<IConnectionManager>();
 
-            cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableOperation>()))
-                .Returns(timeMachine.ScheduleFault<TableOperationResult>(new Exception()));
+            cm.Setup(i => i.TableExecute<T>(It.IsAny<string>(), It.IsAny<TableOperation>()))
+                .Returns(timeMachine.ScheduleFault<TableOperationResult<T>>(new Exception()));
 
             cm.Setup(i => i.TableExecute(It.IsAny<string>(), It.IsAny<TableBatchOperation>()))
                 .Returns(timeMachine.ScheduleFault<TableBatchResult>(new Exception()));
@@ -132,19 +132,19 @@ namespace AzureDataEaseOfUse.NextGen7.Tests
             return tsc.Task;
         }
 
-        public static TableOperationResult SuccessfulTableResult(TableOperation operation)
+        public static TableOperationResult<T> SuccessfulTableResult<T>(TableOperation operation) where T : AzureDataTableEntity<T>
         {
             var result = new TableResult {HttpStatusCode = 200};
 
-            return new TableOperationResult(operation, result);
+            return new TableOperationResult<T>(operation, result);
 
         }
 
-        public static TableOperationResult FailingTableResult(TableOperation operation)
+        public static TableOperationResult<T> FailingTableResult<T>(TableOperation operation) where T : AzureDataTableEntity<T>
         {
             var result = new TableResult { HttpStatusCode = 400 };
 
-            return new TableOperationResult(operation, result);
+            return new TableOperationResult<T>(operation, result);
         }
 
         public static TableBatchResult SuccessfulTableResult(TableBatchOperation batch)
