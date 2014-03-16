@@ -1,9 +1,9 @@
 Intention: Less code developing against storage and caching
 
-* Intended to be somewhat opinionated, but allow overrides for most alterations
+* Intended to be somewhat opinionated.
 * Mostly Async since all of the interaction is with a web api.
-* Most functionality is "extended". This way you don't lose much of the bare metal control. Just gain simplicity.
-* Tests run against live Azure
+* Codebase will often be newer than [NuGet](https://www.nuget.org/packages/AzureDataEaseOfUse) version (documentation follows NuGet version)
+
 
 MIT Licensed. As with any code, use in your own good judgment and have fun :-)
 
@@ -18,7 +18,7 @@ Issues: [Submit an issue](https://github.com/WindowsAzure-Contrib/AzureDataEaseO
 Getting Started
 ---------------
 
-Install from NuGet:
+Install from [NuGet](https://www.nuget.org/packages/AzureDataEaseOfUse):
 ```
 PM> Install-Package AzureDataEaseOfUse -Pre
 ```
