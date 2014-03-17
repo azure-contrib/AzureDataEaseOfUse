@@ -1,8 +1,8 @@
 Intention: Less code developing against storage and caching
 
-* Intended to be somewhat opinionated.
-* Mostly Async since all of the interaction is with a web api.
+* Intended to be somewhat opinionated. (ex. Async by default)
 * Codebase will often be newer than [NuGet](https://www.nuget.org/packages/AzureDataEaseOfUse) version (documentation follows NuGet version)
+* Try to implement [best practices](https://github.com/WindowsAzure-Contrib/AzureDataEaseOfUse/blob/master/BestPractices.md)
 
 
 MIT Licensed. As with any code, use in your own good judgment and have fun :-)
@@ -31,7 +31,7 @@ Add AppSetting
 
 
 Guides for
----------
+----------
 
 1. [Tables](Tables.md)
 2. Blob // Future
@@ -39,31 +39,18 @@ Guides for
 4. Cache // Future
 
 
-Best Practices
---------------
+Some design goals
+-----------------
 
-
-All connections automatically use:
-
-* UseNagleAlgorithm = false;
-* Expect100Continue = false;
-* DefaultConnectionLimit = 1000; (Best Practice is 100+)
-
-Per best practices communicated in (http://www.microsoftvirtualacademy.com/colleges/windows-azure-deep-dive) 
-
-**You "can" override best practices**
-
-```csharp 
-    azure.NagleAlgorithm(enabled: Your_Answer);
-    
-    azure.Expect100Continue(enabled: Your_Answer);
-    
-    // Shortcut to do whatever you want to the endpoint
-    azure.TableServicePoint();
-```
-
-
-
+1. Auto-provisioned batch for Tables (Flywheel)
+2. Best practices (UseNagleAlgorithm, Expect100Continue, DefaultConnectionLimit)
+3. Transaction throughput can fully saturate limits
+4. Storage-Backed caching
+5. Table & Blob caching
+6. Multi-account management (scale-out performance)
+7. Tiered caching (local [fast], Azure.Cache [distributed], Azure.Storage.Blob [plenty of space])
+8. Short-cuts for common actions
+9. Secondary indexes on Table
 
 
 
